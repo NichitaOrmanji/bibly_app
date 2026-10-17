@@ -27,11 +27,6 @@ class MyDayScreen extends StatelessWidget {
             icon: const Icon(Icons.search),
             onPressed: () {},
           ),
-          IconButton(
-            tooltip: 'Профиль',
-            icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () {},
-          ),
         ],
       ),
       body: ListView(

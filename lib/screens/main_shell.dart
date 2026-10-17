@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/coming_soon_view.dart';
+import 'bible_screen.dart';
 import 'my_day_screen.dart';
 
 /// Оболочка с нижней навигацией. Единственное состояние — индекс
@@ -17,9 +18,9 @@ class _MainShellState extends State<MainShell> {
 
   static const List<Widget> _pages = [
     MyDayScreen(),
-    ComingSoonView(title: 'Библия', icon: Icons.menu_book_outlined),
+    BibleScreen(),
     ComingSoonView(title: 'Вместе', icon: Icons.groups_outlined),
-    ComingSoonView(title: 'Скиния', icon: Icons.church_outlined),
+    ComingSoonView(title: 'Профиль', icon: Icons.person_outline),
   ];
 
   @override
@@ -47,9 +48,9 @@ class _MainShellState extends State<MainShell> {
             label: 'Вместе',
           ),
           NavigationDestination(
-            icon: Icon(Icons.church_outlined),
-            selectedIcon: Icon(Icons.church),
-            label: 'Скиния',
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Профиль',
           ),
         ],
       ),

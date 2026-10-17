@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bibly_app/main.dart';
+import 'package:bibly_app/widgets/book_tile.dart';
 
 void main() {
   testWidgets('Login screen is static and leads to My day', (tester) async {
@@ -35,8 +36,28 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
+    await tester.tap(find.text('Вместе'));
+    await tester.pumpAndSettle();
+    expect(find.text('Раздел «Вместе» скоро появится'), findsOneWidget);
+  });
+
+  testWidgets('Bible tab lists books of both testaments', (tester) async {
+    await tester.pumpWidget(const BiblyApp());
+    await tester.tap(find.text('Войти'));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Библия'));
     await tester.pumpAndSettle();
-    expect(find.text('Раздел «Библия» скоро появится'), findsOneWidget);
+    expect(find.text('Ветхий Завет'), findsOneWidget);
+    expect(find.text('Бытие'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  test('Chapter count is declined in Russian', () {
+    expect(BookTile.chaptersLabel(1), '1 глава');
+    expect(BookTile.chaptersLabel(3), '3 главы');
+    expect(BookTile.chaptersLabel(12), '12 глав');
+    expect(BookTile.chaptersLabel(21), '21 глава');
+    expect(BookTile.chaptersLabel(150), '150 глав');
   });
 }
