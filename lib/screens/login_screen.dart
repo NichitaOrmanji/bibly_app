@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utils/app_constants.dart';
-import 'home_screen.dart';
+import 'main_shell.dart';
 
 /// Экран входа — строго статический макет (L2):
 /// без Form, без валидации, без логики аутентификации.
@@ -83,7 +83,7 @@ class LoginScreen extends StatelessWidget {
                     // Только переход дальше, чтобы не блокировать демонстрацию.
                     onPressed: () => Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (_) => const HomeScreen()),
+                      MaterialPageRoute(builder: (_) => const MainShell()),
                     ),
                     child: const Text('Войти'),
                   ),
