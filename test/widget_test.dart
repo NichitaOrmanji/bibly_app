@@ -60,4 +60,23 @@ void main() {
     expect(BookTile.chaptersLabel(21), '21 глава');
     expect(BookTile.chaptersLabel(150), '150 глав');
   });
+
+  testWidgets('Diary opens Tabernacle via password screen', (tester) async {
+    await tester.pumpWidget(const BiblyApp());
+    await tester.tap(find.text('Войти'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Дневник'));
+    await tester.pumpAndSettle();
+    expect(find.text('Мои записи'), findsOneWidget);
+
+    await tester.tap(find.text('Скиния'));
+    await tester.pumpAndSettle();
+    expect(find.text('Пароль Скинии'), findsOneWidget);
+
+    await tester.tap(find.text('Открыть'));
+    await tester.pumpAndSettle();
+    expect(find.text('Эти записи видны только вам'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
