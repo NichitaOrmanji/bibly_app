@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
 import 'utils/app_constants.dart';
 import 'utils/app_theme.dart';
 
@@ -18,7 +18,7 @@ class BiblyApp extends StatelessWidget {
       darkTheme: AppTheme.dark,
       // Светлая или тёмная тема — по настройкам системы.
       themeMode: ThemeMode.system,
-      home: const HomeScreen(),
+      home: const LoginScreen(),
     );
   }
 }
