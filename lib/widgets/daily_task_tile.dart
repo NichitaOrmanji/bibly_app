@@ -6,19 +6,20 @@ import '../models/daily_task.dart';
 /// и отметка выполнения. Отметка статическая — берётся из данных.
 class DailyTaskTile extends StatelessWidget {
   final DailyTask task;
+  final VoidCallback? onTap;
 
-  const DailyTaskTile({super.key, required this.task});
+  const DailyTaskTile({super.key, required this.task, this.onTap});
 
   static IconData _iconFor(DailyTaskType type) {
     switch (type) {
+      case DailyTaskType.quote:
+        return Icons.format_quote;
       case DailyTaskType.reading:
         return Icons.menu_book_outlined;
-      case DailyTaskType.prayer:
-        return Icons.volunteer_activism_outlined;
       case DailyTaskType.reflection:
         return Icons.lightbulb_outline;
-      case DailyTaskType.audio:
-        return Icons.headphones_outlined;
+      case DailyTaskType.prayer:
+        return Icons.volunteer_activism_outlined;
     }
   }
 
@@ -52,6 +53,7 @@ class DailyTaskTile extends StatelessWidget {
         task.isDone ? Icons.check_circle : Icons.radio_button_unchecked,
         color: task.isDone ? scheme.primary : scheme.outline,
       ),
+      onTap: onTap,
     );
   }
 }

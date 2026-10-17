@@ -1,7 +1,8 @@
 /// Вид пункта ежедневного плана — по нему выбирается иконка.
-enum DailyTaskType { reading, prayer, reflection, audio }
+enum DailyTaskType { quote, reading, reflection, prayer }
 
-/// Пункт плана на день: чтение, молитва, размышление или аудио.
+/// Пункт плана на день: цитата, отрывок из Библии, размышление
+/// или призыв к молитве.
 class DailyTask {
   final String title;
   final String subtitle;

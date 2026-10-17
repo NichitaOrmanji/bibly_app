@@ -22,50 +22,33 @@ class MockData {
     reference: 'Ин 3:16',
   );
 
+  /// План на день — всегда 4 шага в одном порядке:
+  /// цитата → отрывок из Библии → размышление → призыв к молитве.
   static const List<DailyTask> todayPlan = [
     DailyTask(
-      title: 'Утренняя молитва',
-      subtitle: 'Благодарность за новый день',
-      minutes: 3,
-      type: DailyTaskType.prayer,
+      title: 'Цитата дня',
+      subtitle: '«Молитва не меняет Бога, но меняет молящегося» — С. Кьеркегор',
+      minutes: 1,
+      type: DailyTaskType.quote,
       isDone: true,
     ),
     DailyTask(
-      title: 'Псалом 22',
-      subtitle: 'Господь — Пастырь мой',
-      minutes: 2,
-      type: DailyTaskType.reading,
-      isDone: true,
-    ),
-    DailyTask(
-      title: 'Евангелие от Иоанна, глава 3',
-      subtitle: 'Беседа Иисуса с Никодимом',
+      title: 'Отрывок из Библии',
+      subtitle: 'Ин 3:1–21 · Беседа Иисуса с Никодимом',
       minutes: 7,
       type: DailyTaskType.reading,
       isDone: true,
     ),
     DailyTask(
-      title: 'Размышление дня',
+      title: 'Размышление',
       subtitle: 'Что значит «родиться свыше»?',
       minutes: 5,
       type: DailyTaskType.reflection,
     ),
     DailyTask(
-      title: 'Притчи, глава 3',
-      subtitle: 'Надейся на Господа всем сердцем',
-      minutes: 4,
-      type: DailyTaskType.reading,
-    ),
-    DailyTask(
-      title: 'Аудио: Послание к Филиппийцам 4',
-      subtitle: 'Радуйтесь всегда в Господе',
-      minutes: 6,
-      type: DailyTaskType.audio,
-    ),
-    DailyTask(
-      title: 'Вечерняя молитва',
-      subtitle: 'Итоги дня и молитва за близких',
-      minutes: 5,
+      title: 'Призыв к молитве',
+      subtitle: 'Помолитесь о тех, кто ищет ответы, как Никодим',
+      minutes: 3,
       type: DailyTaskType.prayer,
     ),
   ];
