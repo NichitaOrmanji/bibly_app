@@ -1,30 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../utils/app_constants.dart';
-import '../widgets/theme_toggle_button.dart';
 
+/// Временная заглушка стартового экрана — будет заменена экраном «Мой день».
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, required this.themeMode});
-
-  final ValueNotifier<ThemeMode> themeMode;
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppConstants.appName),
-        actions: [ThemeToggleButton(themeMode: themeMode)],
-      ),
+      appBar: AppBar(title: const Text(AppConstants.appName)),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingLarge),
-          child: Text(
-            'Добро пожаловать в ${AppConstants.appName}',
-            style: textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
+        child: Text(
+          'Добро пожаловать в ${AppConstants.appName}',
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
       ),
     );
