@@ -6,6 +6,7 @@ import '../utils/app_constants.dart';
 import '../widgets/book_tile.dart';
 import '../widgets/section_header.dart';
 import 'chapter_screen.dart';
+import 'search_screen.dart';
 
 /// «Библия» — продолжить чтение и список всех книг,
 /// разделённый на Ветхий и Новый Завет.
@@ -28,7 +29,10 @@ class BibleScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Поиск',
             icon: const Icon(Icons.search),
-            onPressed: () {},
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SearchScreen()),
+            ),
           ),
         ],
       ),

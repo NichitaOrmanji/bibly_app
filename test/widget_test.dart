@@ -119,4 +119,16 @@ void main() {
     expect(InitialsAvatar.initialsOf('Никита Орманжи'), 'НО');
     expect(InitialsAvatar.initialsOf('Андрей'), 'А');
   });
+
+  testWidgets('Search opens from My day and shows results', (tester) async {
+    await tester.pumpWidget(const BiblyApp());
+    await tester.tap(find.text('Войти'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Поиск'));
+    await tester.pumpAndSettle();
+    expect(find.text('Найдено стихов: 7'), findsOneWidget);
+    expect(find.byType(FilterChip), findsNWidgets(4));
+    expect(tester.takeException(), isNull);
+  });
 }

@@ -7,6 +7,7 @@ import '../widgets/daily_task_tile.dart';
 import '../widgets/section_header.dart';
 import '../widgets/verse_card.dart';
 import 'chapter_screen.dart';
+import 'search_screen.dart';
 
 /// «Мой день» — главный экран: приветствие, серия дней, стих дня
 /// и план на сегодня. Все данные из [MockData].
@@ -27,7 +28,10 @@ class MyDayScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Поиск',
             icon: const Icon(Icons.search),
-            onPressed: () {},
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SearchScreen()),
+            ),
           ),
         ],
       ),
