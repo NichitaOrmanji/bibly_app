@@ -235,3 +235,11 @@
 - Скриншоты: `screenshots/18_dark_my_day_android.png`, `screenshots/19_dark_bible_android.png`,
   `screenshots/20_dark_together_android.png`; пересняты `05_bible_android.png`,
   `07_diary_android.png`.
+
+### Шаг 15. Отчёт
+- Требования к отчёту взяты из задания ЛР2 (раздел 9) и ЛР1 (титульный лист).
+- `docs/report/build_report.py` собирает отчёт из кода виджетов, скриншотов и
+  `git log --oneline` в HTML и печатает его в PDF через Edge (headless).
+  Сгенерированные `PAM_L2_*.pdf/.html` не хранятся в git (`.gitignore`).
+- Финальные скриншоты для отчёта: `21_my_day_final_android.png`,
+  `22_bible_nt_final_android.png` (с итоговой нижней панелью на 5 вкладок).
