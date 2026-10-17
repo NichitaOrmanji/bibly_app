@@ -1,5 +1,6 @@
 import '../models/bible_book.dart';
 import '../models/chapter_verse.dart';
+import '../models/community.dart';
 import '../models/daily_task.dart';
 import '../models/diary_entry.dart';
 import '../models/verse.dart';
@@ -267,6 +268,68 @@ class MockData {
           'Малая группа — единство.',
       dateLabel: '6 окт',
       isPrivate: true,
+    ),
+  ];
+
+  // ---------- Вместе ----------
+
+  static const List<ReadingGroup> groups = [
+    ReadingGroup('Малая группа «Филиппийцы»', 8, 'Послание к Филиппийцам', 0.75),
+    ReadingGroup('Студенты УТМ', 23, 'Евангелие от Иоанна за 21 день', 0.43),
+    ReadingGroup('Семья Орманжи', 4, 'Псалмы утешения', 0.6),
+    ReadingGroup('Утренний кофе и Притчи', 12, 'Притчи — глава в день', 0.32),
+    ReadingGroup('Молодёжь церкви «Благодать»', 31, 'Нагорная проповедь', 0.9),
+    ReadingGroup('Библия за год 2026', 146, 'Вся Библия за 365 дней', 0.79),
+  ];
+
+  static const List<FriendActivity> feed = [
+    FriendActivity(
+      name: 'Андрей Чобану',
+      action: 'закончил план «Нагорная проповедь»',
+      timeLabel: '15 мин назад',
+      prayers: 6,
+    ),
+    FriendActivity(
+      name: 'Елена Русу',
+      action: 'поделилась записью к Флп 4:6',
+      timeLabel: '1 ч назад',
+      sharedText: 'Перестала тревожиться о сессии, когда начала '
+          'записывать молитвы. Список длинный, но на душе тише.',
+      prayers: 11,
+    ),
+    FriendActivity(
+      name: 'Максим Бурлаку',
+      action: 'читает Ин 3 — день 12 из 21',
+      timeLabel: '2 ч назад',
+      prayers: 2,
+    ),
+    FriendActivity(
+      name: 'Ольга Попеску',
+      action: 'просит молитвы',
+      timeLabel: '3 ч назад',
+      sharedText: 'Завтра у папы операция. Буду благодарна '
+          'за молитвы обо всей нашей семье.',
+      prayers: 24,
+    ),
+    FriendActivity(
+      name: 'Даниил Морарь',
+      action: '30 дней подряд с Библией',
+      timeLabel: 'вчера',
+      prayers: 9,
+    ),
+    FriendActivity(
+      name: 'Мария Лупу',
+      action: 'поделилась записью к Пс 22:1',
+      timeLabel: 'вчера',
+      sharedText: 'Господь — Пастырь мой. Перечитала в автобусе '
+          'и впервые не спешила.',
+      prayers: 7,
+    ),
+    FriendActivity(
+      name: 'Сергей Гуцу',
+      action: 'присоединился к группе «Студенты УТМ»',
+      timeLabel: '2 дня назад',
+      prayers: 3,
     ),
   ];
 }

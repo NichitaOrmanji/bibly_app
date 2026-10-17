@@ -39,7 +39,9 @@ void main() {
 
     await tester.tap(find.text('Вместе'));
     await tester.pumpAndSettle();
-    expect(find.text('Раздел «Вместе» скоро появится'), findsOneWidget);
+    expect(find.text('Мои группы'), findsOneWidget);
+    expect(find.text('Лента друзей'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Bible tab lists books of both testaments', (tester) async {
