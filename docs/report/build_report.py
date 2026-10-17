@@ -165,9 +165,9 @@ pre.code { font-family: Consolas, monospace; font-size: 8.5pt; line-height: 1.25
 .title .mid .th { font-size: 13pt; margin-top: 18pt; font-style: italic; }
 .title .who { margin-top: auto; margin-left: auto; text-align: left; font-size: 13pt; line-height: 1.8; }
 .title .city { margin-top: 30mm; font-size: 13pt; }
-.screen { page-break-inside: avoid; margin-bottom: 10pt; }
+.screen { page-break-inside: avoid; margin-bottom: 6pt; }
 .shots { display: flex; gap: 10mm; justify-content: center; margin: 6pt 0; }
-img.shot { width: 58mm; border: 1px solid #ccc; border-radius: 3mm; }
+img.shot { width: 41mm; border: 1px solid #ccc; border-radius: 3mm; }
 img.small { width: 48mm; border: 1px solid #ccc; border-radius: 3mm; }
 table { border-collapse: collapse; width: 100%; font-size: 11pt; }
 td, th { border: 1px solid #bbb; padding: 3pt 6pt; vertical-align: top; }
@@ -188,8 +188,8 @@ def build_html() -> str:
     <div class="th">{t['theme']}</div>
   </div>
   <div class="who">
-    Выполнил: студент гр. {t['group']}<br>{t['student']}<br><br>
-    Проверил: {t['teacher']}<br>Учебный год: {t['year']}
+    Студент: {t['student']}, гр. {t['group']}<br>
+    Преподаватель: {t['teacher']}<br>Учебный год: {t['year']}
   </div>
   <div class="city">{t['city']}</div>
 </div>"""]
