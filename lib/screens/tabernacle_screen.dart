@@ -29,28 +29,31 @@ class TabernacleScreen extends StatelessWidget {
         icon: const Icon(Icons.history_edu),
         label: const Text('Личная запись'),
       ),
-      body: ListView(
+      // Элемент 0 — подсказка о приватности, дальше — записи.
+      body: ListView.builder(
         padding: const EdgeInsets.only(bottom: 88),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(AppConstants.paddingMedium),
-            child: Row(
-              children: [
-                Icon(Icons.visibility_off, size: 18, color: scheme.secondary),
-                const SizedBox(width: AppConstants.paddingSmall),
-                Expanded(
-                  child: Text(
-                    'Эти записи видны только вам',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
+        itemCount: entries.length + 1,
+        itemBuilder: (context, i) {
+          if (i == 0) {
+            return Padding(
+              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+              child: Row(
+                children: [
+                  Icon(Icons.visibility_off, size: 18, color: scheme.secondary),
+                  const SizedBox(width: AppConstants.paddingSmall),
+                  Expanded(
+                    child: Text(
+                      'Эти записи видны только вам',
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(color: scheme.onSurfaceVariant),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          for (final entry in entries) DiaryEntryCard(entry: entry),
-        ],
+                ],
+              ),
+            );
+          }
+          return DiaryEntryCard(entry: entries[i - 1]);
+        },
       ),
     );
   }

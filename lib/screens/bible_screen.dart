@@ -15,12 +15,9 @@ class BibleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final oldBooks =
-        MockData.books.where((b) => b.testament == Testament.old).toList();
-    final newBooks = MockData.books
-        .where((b) => b.testament == Testament.newTestament)
-        .toList();
+    const books = MockData.books;
+    final oldCount = books.where((b) => b.testament == Testament.old).length;
+    final newCount = books.length - oldCount;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,60 +33,79 @@ class BibleScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
+      // ListView.builder строит строки лениво — только видимые из 66 книг.
+      // Элемент 0 — карточка «Продолжить», дальше — книги.
+      body: ListView.builder(
         padding: const EdgeInsets.only(bottom: AppConstants.paddingLarge),
-        children: [
-          Card(
-            elevation: 0,
-            color: scheme.primaryContainer,
-            margin: const EdgeInsets.fromLTRB(
-              AppConstants.paddingMedium,
-              AppConstants.paddingSmall,
-              AppConstants.paddingMedium,
-              0,
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.paddingMedium,
-                vertical: AppConstants.paddingSmall,
+        itemCount: books.length + 1,
+        itemBuilder: (context, i) {
+          if (i == 0) return const _ContinueReadingCard();
+
+          final book = books[i - 1];
+          final tile = BookTile(book: book, onTap: () {});
+
+          // Заголовок завета ставим перед первой книгой каждого завета.
+          final startsTestament =
+              i == 1 || books[i - 2].testament != book.testament;
+          if (!startsTestament) return tile;
+
+          final isOld = book.testament == Testament.old;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionHeader(
+                title: isOld ? 'Ветхий Завет' : 'Новый Завет',
+                trailing: '${isOld ? oldCount : newCount} книг',
               ),
-              leading: Icon(
-                Icons.bookmark,
-                color: scheme.onPrimaryContainer,
-              ),
-              title: Text(
-                'Продолжить: ${MockData.lastReadBook}, '
-                'глава ${MockData.lastReadChapter}',
-                style: TextStyle(
-                  color: scheme.onPrimaryContainer,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              subtitle: Text(
-                MockData.translation,
-                style: TextStyle(color: scheme.onPrimaryContainer),
-              ),
-              trailing: Icon(
-                Icons.arrow_forward,
-                color: scheme.onPrimaryContainer,
-              ),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ChapterScreen()),
-              ),
-            ),
+              tile,
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Карточка «Продолжить чтение» — открывает главу, где остановился читатель.
+class _ContinueReadingCard extends StatelessWidget {
+  const _ContinueReadingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Card(
+      elevation: 0,
+      color: scheme.primaryContainer,
+      margin: const EdgeInsets.fromLTRB(
+        AppConstants.paddingMedium,
+        AppConstants.paddingSmall,
+        AppConstants.paddingMedium,
+        0,
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.paddingMedium,
+          vertical: AppConstants.paddingSmall,
+        ),
+        leading: Icon(Icons.bookmark, color: scheme.onPrimaryContainer),
+        title: Text(
+          'Продолжить: ${MockData.lastReadBook}, '
+          'глава ${MockData.lastReadChapter}',
+          style: TextStyle(
+            color: scheme.onPrimaryContainer,
+            fontWeight: FontWeight.w600,
           ),
-          SectionHeader(
-            title: 'Ветхий Завет',
-            trailing: '${oldBooks.length} книг',
-          ),
-          for (final book in oldBooks) BookTile(book: book, onTap: () {}),
-          SectionHeader(
-            title: 'Новый Завет',
-            trailing: '${newBooks.length} книг',
-          ),
-          for (final book in newBooks) BookTile(book: book, onTap: () {}),
-        ],
+        ),
+        subtitle: Text(
+          MockData.translation,
+          style: TextStyle(color: scheme.onPrimaryContainer),
+        ),
+        trailing: Icon(Icons.arrow_forward, color: scheme.onPrimaryContainer),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ChapterScreen()),
+        ),
       ),
     );
   }

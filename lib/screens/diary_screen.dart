@@ -22,53 +22,65 @@ class DiaryScreen extends StatelessWidget {
         icon: const Icon(Icons.history_edu),
         label: const Text('Новая запись'),
       ),
-      body: ListView(
+      // ListView.builder: элемент 0 — вход в Скинию, 1 — заголовок,
+      // дальше — записи дневника.
+      body: ListView.builder(
         // Нижний отступ, чтобы FAB не закрывал последнюю запись.
         padding: const EdgeInsets.only(bottom: 88),
-        children: [
-          Card(
-            elevation: 0,
-            color: scheme.secondaryContainer,
-            margin: const EdgeInsets.fromLTRB(
-              AppConstants.paddingMedium,
-              AppConstants.paddingSmall,
-              AppConstants.paddingMedium,
-              0,
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.paddingMedium,
-                vertical: AppConstants.paddingSmall,
+        itemCount: entries.length + 2,
+        itemBuilder: (context, i) {
+          if (i == 0) {
+            return Card(
+              elevation: 0,
+              color: scheme.secondaryContainer,
+              margin: const EdgeInsets.fromLTRB(
+                AppConstants.paddingMedium,
+                AppConstants.paddingSmall,
+                AppConstants.paddingMedium,
+                0,
               ),
-              leading: CircleAvatar(
-                backgroundColor: scheme.secondary,
-                child: Icon(Icons.lock, color: scheme.onSecondary),
-              ),
-              title: Text(
-                'Скиния',
-                style: TextStyle(
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingMedium,
+                  vertical: AppConstants.paddingSmall,
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: scheme.secondary,
+                  child: Icon(Icons.lock, color: scheme.onSecondary),
+                ),
+                title: Text(
+                  'Скиния',
+                  style: TextStyle(
+                    color: scheme.onSecondaryContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Личные записи · ${MockData.tabernacleEntries.length} · '
+                  'вход по паролю',
+                  style: TextStyle(color: scheme.onSecondaryContainer),
+                ),
+                trailing: Icon(
+                  Icons.chevron_right,
                   color: scheme.onSecondaryContainer,
-                  fontWeight: FontWeight.w600,
+                ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const TabernacleLockScreen(),
+                  ),
                 ),
               ),
-              subtitle: Text(
-                'Личные записи · ${MockData.tabernacleEntries.length} · '
-                'вход по паролю',
-                style: TextStyle(color: scheme.onSecondaryContainer),
-              ),
-              trailing: Icon(
-                Icons.chevron_right,
-                color: scheme.onSecondaryContainer,
-              ),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const TabernacleLockScreen()),
-              ),
-            ),
-          ),
-          SectionHeader(title: 'Мои записи', trailing: '${entries.length}'),
-          for (final entry in entries) DiaryEntryCard(entry: entry),
-        ],
+            );
+          }
+          if (i == 1) {
+            return SectionHeader(
+              title: 'Мои записи',
+              trailing: '${entries.length}',
+            );
+          }
+          return DiaryEntryCard(entry: entries[i - 2]);
+        },
       ),
     );
   }
