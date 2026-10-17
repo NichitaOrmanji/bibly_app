@@ -79,4 +79,18 @@ void main() {
     expect(find.text('Эти записи видны только вам'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Continue reading opens the chapter', (tester) async {
+    await tester.pumpWidget(const BiblyApp());
+    await tester.tap(find.text('Войти'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Библия'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Продолжить'));
+    await tester.pumpAndSettle();
+    expect(find.text('Беседа Иисуса с Никодимом'), findsOneWidget);
+    expect(find.text('В дневник'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

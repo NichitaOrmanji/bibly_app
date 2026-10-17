@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../data/mock_data.dart';
+import '../models/daily_task.dart';
 import '../utils/app_constants.dart';
 import '../widgets/daily_task_tile.dart';
 import '../widgets/section_header.dart';
 import '../widgets/verse_card.dart';
+import 'chapter_screen.dart';
 
 /// «Мой день» — главный экран: приветствие, серия дней, стих дня
 /// и план на сегодня. Все данные из [MockData].
@@ -85,7 +87,19 @@ class MyDayScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppConstants.paddingSmall),
-          for (final task in plan) DailyTaskTile(task: task),
+          for (final task in plan)
+            DailyTaskTile(
+              task: task,
+              // Пока открывается только отрывок из Библии.
+              onTap: task.type == DailyTaskType.reading
+                  ? () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ChapterScreen(),
+                        ),
+                      )
+                  : null,
+            ),
         ],
       ),
     );

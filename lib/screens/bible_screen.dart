@@ -5,6 +5,7 @@ import '../models/bible_book.dart';
 import '../utils/app_constants.dart';
 import '../widgets/book_tile.dart';
 import '../widgets/section_header.dart';
+import 'chapter_screen.dart';
 
 /// «Библия» — продолжить чтение и список всех книг,
 /// разделённый на Ветхий и Новый Завет.
@@ -68,7 +69,10 @@ class BibleScreen extends StatelessWidget {
                 Icons.arrow_forward,
                 color: scheme.onPrimaryContainer,
               ),
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ChapterScreen()),
+              ),
             ),
           ),
           SectionHeader(
