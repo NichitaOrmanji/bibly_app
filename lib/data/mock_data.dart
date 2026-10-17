@@ -11,6 +11,12 @@ class MockData {
   // ---------- Мой день ----------
 
   static const String userName = 'Никита';
+  static const String userFullName = 'Никита Орманжи';
+  static const String userEmail = 'nikita@example.com';
+  static const String memberSince = 'с сентября 2026';
+
+  /// Сколько глав прочитано всего (для профиля).
+  static const int chaptersRead = 86;
 
   static const String todayLabel = 'Суббота, 17 октября';
 

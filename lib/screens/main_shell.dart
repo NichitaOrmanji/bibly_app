@@ -4,6 +4,7 @@ import '../widgets/coming_soon_view.dart';
 import 'bible_screen.dart';
 import 'diary_screen.dart';
 import 'my_day_screen.dart';
+import 'profile_screen.dart';
 
 /// Оболочка с нижней навигацией. Единственное состояние — индекс
 /// выбранной вкладки (это допускается условиями ЛР2).
@@ -22,7 +23,7 @@ class _MainShellState extends State<MainShell> {
     BibleScreen(),
     DiaryScreen(),
     ComingSoonView(title: 'Вместе', icon: Icons.groups_outlined),
-    ComingSoonView(title: 'Профиль', icon: Icons.person_outline),
+    ProfileScreen(),
   ];
 
   @override

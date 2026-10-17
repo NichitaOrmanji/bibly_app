@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bibly_app/main.dart';
 import 'package:bibly_app/widgets/book_tile.dart';
+import 'package:bibly_app/widgets/initials_avatar.dart';
 
 void main() {
   testWidgets('Login screen is static and leads to My day', (tester) async {
@@ -92,5 +93,28 @@ void main() {
     expect(find.text('Беседа Иисуса с Никодимом'), findsOneWidget);
     expect(find.text('В дневник'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Profile shows stats and settings, logout returns to login',
+      (tester) async {
+    await tester.pumpWidget(const BiblyApp());
+    await tester.tap(find.text('Войти'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Профиль').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Никита Орманжи'), findsOneWidget);
+    expect(find.text('Перевод Библии'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.scrollUntilVisible(find.text('Выйти'), 200);
+    await tester.tap(find.text('Выйти'));
+    await tester.pumpAndSettle();
+    expect(find.text('Войти'), findsOneWidget);
+  });
+
+  test('Initials are taken from the first two words', () {
+    expect(InitialsAvatar.initialsOf('Никита Орманжи'), 'НО');
+    expect(InitialsAvatar.initialsOf('Андрей'), 'А');
   });
 }
