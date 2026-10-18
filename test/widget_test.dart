@@ -129,6 +129,7 @@ void main() {
     await tester.tap(find.text('Профиль').last);
     await tester.pumpAndSettle();
     expect(find.text('Никита Орманжи'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Перевод Библии'), 200);
     expect(find.text('Перевод Библии'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
@@ -383,5 +384,39 @@ void main() {
     router.go('/day');
     await tester.pumpAndSettle();
     expect(find.text('Доброе утро, Мария!'), findsOneWidget);
+  });
+
+  testWidgets('Crash switch: retry fails without crash, then data returns', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(createApp());
+    await logIn(tester);
+
+    router.go('/profile');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Симулировать сбой сети'));
+    await tester.pumpAndSettle();
+
+    // Дневник ещё не загружался: первая загрузка падает → экран ошибки.
+    router.go('/diary');
+    await tester.pumpAndSettle();
+    await waitNetwork(tester);
+    expect(find.text('Сервер не отвечает — повторите попытку'), findsOneWidget);
+    expect(find.text('Повторить'), findsOneWidget);
+
+    // Авария выключена → «Повторить» → данные вернулись.
+    router.go('/profile');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Симулировать сбой сети'));
+    await tester.pumpAndSettle();
+    router.go('/diary');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Повторить'));
+    await waitNetwork(tester);
+    expect(find.text('Мои записи'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
