@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../models/diary_entry.dart';
 import '../models/diary_model.dart';
 import '../utils/app_constants.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/diary_entry_card.dart';
 import '../widgets/error_view.dart';
 import '../widgets/section_header.dart';
@@ -86,13 +88,56 @@ class DiaryScreen extends StatelessWidget {
                   );
                 }
                 final entry = entries[i - 2];
-                return DiaryEntryCard(
-                  entry: entry,
-                  // push + id в адресе: детали сами найдут запись.
-                  onTap: () => context.push('/diary/${entry.id}'),
+                // Свайп удаляет запись. Ключ — идентичность из данных
+                // (ValueKey(id)), не UniqueKey: Flutter должен знать,
+                // какая именно строка ушла.
+                return Dismissible(
+                  key: ValueKey(entry.id),
+                  direction: DismissDirection.endToStart,
+                  background: const _DeleteBackground(),
+                  confirmDismiss: (_) => _confirmDelete(context, entry),
+                  child: DiaryEntryCard(
+                    entry: entry,
+                    // push + id в адресе: детали сами найдут запись.
+                    onTap: () => context.push('/diary/${entry.id}'),
+                  ),
                 );
               },
             ),
+    );
+  }
+}
+
+/// Подтверждение и удаление по свайпу. true — строку можно убрать:
+/// запись уже удалена в хранилище и модели.
+Future<bool> _confirmDelete(BuildContext context, DiaryEntry entry) async {
+  final ok = await showConfirmDialog(
+    context,
+    title: 'Удалить запись?',
+    message: '«${entry.title}» будет удалена без возможности восстановления.',
+    confirmLabel: 'Удалить',
+  );
+  if (!ok || !context.mounted) return false;
+  final error = await context.read<DiaryModel>().remove(entry.id);
+  if (!context.mounted) return error == null;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(error ?? 'Запись «${entry.title}» удалена')),
+  );
+  return error == null;
+}
+
+/// Красный фон под карточкой при свайпе.
+class _DeleteBackground extends StatelessWidget {
+  const _DeleteBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: AppConstants.paddingLarge),
+      color: scheme.errorContainer,
+      child: Icon(Icons.delete_outline, color: scheme.onErrorContainer),
     );
   }
 }

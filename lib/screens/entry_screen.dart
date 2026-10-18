@@ -7,20 +7,26 @@ import '../utils/app_constants.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/error_view.dart';
 
-/// Удаление: подтверждение → SnackBar → назад к списку.
-/// Запись на самом деле не исчезает — состояние появится в ЛР4.
-Future<void> _delete(BuildContext context, String title) async {
+/// Удаление: подтверждение → удаление через модель → назад.
+/// Запись исчезает из списка, Скинии, поиска и статистики профиля —
+/// всем подписчикам весть приносит notifyListeners.
+Future<void> _delete(BuildContext context, int id, String title) async {
   final ok = await showConfirmDialog(
     context,
     title: 'Удалить запись?',
     message: '«$title» будет удалена без возможности восстановления.',
     confirmLabel: 'Удалить',
   );
-  if (ok && context.mounted) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Запись «$title» удалена')));
-    context.pop();
+  if (!ok || !context.mounted) return;
+  final error = await context.read<DiaryModel>().remove(id);
+  if (!context.mounted) return; // экран может умереть, пока «запрос» летит
+  if (error != null) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+    return;
   }
+  ScaffoldMessenger.of(context)
+      .showSnackBar(SnackBar(content: Text('Запись «$title» удалена')));
+  context.pop(); // объекта больше нет — его экран уходит из стека
 }
 
 /// Запись дневника — адреса /diary/:id и /diary/tabernacle/:id.
@@ -63,7 +69,7 @@ class EntryScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Удалить',
             icon: const Icon(Icons.delete_outline),
-            onPressed: () => _delete(context, entry.title),
+            onPressed: () => _delete(context, entry.id, entry.title),
           ),
         ],
       ),

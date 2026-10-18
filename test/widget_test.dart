@@ -7,6 +7,14 @@ import 'package:bibly_app/screens/new_entry_screen.dart';
 import 'package:bibly_app/utils/validators.dart';
 import 'package:bibly_app/widgets/book_tile.dart';
 import 'package:bibly_app/widgets/initials_avatar.dart';
+import 'package:bibly_app/widgets/stat_tile.dart';
+
+/// Даёт mock-хранилищу «ответить»: задержка 800 мс идёт без анимации,
+/// поэтому одного pumpAndSettle мало.
+Future<void> waitNetwork(WidgetTester tester) async {
+  await tester.pump(const Duration(seconds: 1));
+  await tester.pumpAndSettle();
+}
 
 /// Вводит корректные данные и нажимает «Войти».
 Future<void> logIn(WidgetTester tester) async {
@@ -307,5 +315,37 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('3 из 4'), findsOneWidget);
     expect(find.text('1'), findsOneWidget); // бейдж на вкладке уменьшился
+  });
+
+  testWidgets('Deleting an entry removes it from the list and the profile', (
+    tester,
+  ) async {
+    await tester.pumpWidget(createApp());
+    await logIn(tester);
+
+    router.go('/profile');
+    await tester.pumpAndSettle();
+    await waitNetwork(tester); // DiaryModel создаётся лениво — ждём ответа
+    expect(find.text('13'), findsOneWidget); // 7 записей + 6 в Скинии
+
+    router.go('/diary/2');
+    await tester.pumpAndSettle();
+    expect(find.text('Господь — Пастырь мой'), findsOneWidget);
+    await tester.tap(find.byTooltip('Удалить'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Удалить'));
+    await waitNetwork(tester); // удаление идёт через «сеть» mock-а
+
+    // Детали закрылись, запись исчезла из списка Дневника…
+    expect(find.text('Мои записи'), findsOneWidget);
+    expect(find.text('Господь — Пастырь мой'), findsNothing);
+    // …и из статистики профиля — никто ничего не перезагружал.
+    router.go('/profile');
+    await tester.pumpAndSettle();
+    final entriesTile = find.widgetWithText(StatTile, 'записей');
+    expect(
+      find.descendant(of: entriesTile, matching: find.text('12')),
+      findsOneWidget,
+    );
   });
 }

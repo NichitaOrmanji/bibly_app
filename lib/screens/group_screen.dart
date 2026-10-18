@@ -9,19 +9,25 @@ import '../widgets/error_view.dart';
 import '../widgets/initials_avatar.dart';
 import '../widgets/section_header.dart';
 
-/// Выход из группы: подтверждение → SnackBar → назад.
-Future<void> _leave(BuildContext context, String name) async {
+/// Выход из группы: подтверждение → leaveGroup через модель → назад.
+/// Группа исчезает из списка «Мои группы».
+Future<void> _leave(BuildContext context, int id, String name) async {
   final ok = await showConfirmDialog(
     context,
     title: 'Покинуть группу?',
     message: 'Вы перестанете видеть прогресс и записи группы «$name».',
     confirmLabel: 'Покинуть',
   );
-  if (ok && context.mounted) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Вы покинули группу «$name»')));
-    context.pop();
+  if (!ok || !context.mounted) return;
+  final error = await context.read<CommunityModel>().leaveGroup(id);
+  if (!context.mounted) return;
+  if (error != null) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+    return;
   }
+  ScaffoldMessenger.of(context)
+      .showSnackBar(SnackBar(content: Text('Вы покинули группу «$name»')));
+  context.pop();
 }
 
 /// Группа — адрес /together/:groupId. План, прогресс и участники.
@@ -91,7 +97,7 @@ class GroupScreen extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: scheme.error,
                         ),
-                        onPressed: () => _leave(context, group.name),
+                        onPressed: () => _leave(context, group.id, group.name),
                         icon: const Icon(Icons.exit_to_app),
                         label: const Text('Покинуть группу'),
                       ),
