@@ -1,5 +1,7 @@
 /// Группа совместного чтения: название, участники, текущий план и прогресс.
 class ReadingGroup {
+  /// Номер группы — путешествует в адресе: /together/2.
+  final int id;
   final String name;
   final int members;
   final String plan;
@@ -7,7 +9,13 @@ class ReadingGroup {
   /// Доля пройденного плана, от 0 до 1.
   final double progress;
 
-  const ReadingGroup(this.name, this.members, this.plan, this.progress);
+  const ReadingGroup(
+    this.id,
+    this.name,
+    this.members,
+    this.plan,
+    this.progress,
+  );
 }
 
 /// Событие в ленте друзей: кто, что сделал, когда и (необязательно)
