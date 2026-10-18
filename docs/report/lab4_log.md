@@ -56,3 +56,21 @@
     `MockCommunityRepository`, `MockProfileRepository`, `MockDailyRepository`.
 - `mock_data.dart` теперь только seed: в него добавлен `MockData.user` (профиль).
 - `test/repository_test.dart`: id от хранилища, «404» на delete/fetchById, авария → `Err`, поиск.
+
+### Задание 4. Модели с хранилищем и три состояния
+- Модели (`lib/models/*_model.dart`) получают хранилище **через конструктор**, тип поля —
+  **интерфейс**; у каждой триада `isLoading` / `error` / данные и `load()` по шаблону C8
+  (`notifyListeners` на входе в «грузится» и на выходе — с данными или ошибкой):
+  `DayPlanModel(DailyRepository)` (теперь грузит план и пишет отметки через хранилище),
+  `DiaryModel(DiaryRepository)` (+ `byId`, `publicEntries`, `privateEntries`, `add/update/remove`),
+  `BibleModel(BibleRepository)` (книги, кэш глав по ключу «книга:глава» со своей триадой, поиск),
+  `CommunityModel(CommunityRepository)` (группы + лента параллельно через `(a, b).wait`, `leaveGroup`),
+  `ProfileModel(ProfileRepository)` (+ `update`).
+- Мутации возвращают `Future<String?>`: `null` — успех, иначе сообщение (как у validator).
+- **Корень композиции** `main.dart`: `createApp()` создаёт `MockNetwork` и пять mock-хранилищ
+  в переменные с типом интерфейса; `MultiProvider`: `Provider<MockNetwork>.value` (леса аварии)
+  и пять `ChangeNotifierProvider(create: (_) => XModel(repo)..load())` — фабрика + первая загрузка.
+- `lib/widgets/error_view.dart` — `ErrorView`: иконка, сообщение и `FilledButton` «Повторить» (`onRetry`).
+- **Мой день** мигрирован: `watch<DayPlanModel>()` + `watch<ProfileModel>()` в build →
+  спиннер / `ErrorView` (retry грузит обе модели) / данные; имя, серия дней и «Продолжить» —
+  из профиля, стих и дата — из плана. Галочка — `read<DayPlanModel>().toggle(id)`; при ошибке SnackBar.

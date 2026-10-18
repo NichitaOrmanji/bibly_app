@@ -2,28 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
 import '../models/daily_task.dart';
 import '../models/day_plan_model.dart';
+import '../models/profile_model.dart';
 import '../utils/app_constants.dart';
 import '../widgets/daily_task_tile.dart';
+import '../widgets/error_view.dart';
 import '../widgets/section_header.dart';
 import '../widgets/verse_card.dart';
 
 /// «Мой день» — главный экран: приветствие, серия дней, стих дня
-/// и план на сегодня. Отметки плана — в [DayPlanModel].
+/// и план на сегодня. Данные — из [DayPlanModel] и [ProfileModel].
 class MyDayScreen extends StatelessWidget {
   const MyDayScreen({super.key});
 
+  Future<void> _toggle(BuildContext context, DailyTask task) async {
+    // ДЕЙСТВУЕМ — read в callback-е.
+    final error = await context.read<DayPlanModel>().toggle(task.id);
+    if (error != null && context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error)));
+    }
+  }
+
+  void _retry(BuildContext context) {
+    context.read<DayPlanModel>().load();
+    context.read<ProfileModel>().load();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     // ПОКАЗЫВАЕМ и следим — watch в build: экран перерисуется
-    // при каждом notifyListeners модели.
-    final planModel = context.watch<DayPlanModel>();
-    final plan = planModel.tasks;
-    final doneCount = planModel.doneCount;
+    // при каждом notifyListeners моделей.
+    final day = context.watch<DayPlanModel>();
+    final profileModel = context.watch<ProfileModel>();
+    final error = day.error ?? profileModel.error;
+
+    final Widget body;
+    if (day.isLoading || profileModel.isLoading) {
+      body = const Center(child: CircularProgressIndicator()); // 1) грузится
+    } else if (error != null ||
+        profileModel.profile == null ||
+        day.verseOfDay == null) {
+      body = ErrorView(
+        // 2) упало — сообщение и retry
+        message: error ?? 'Не удалось загрузить день',
+        onRetry: () => _retry(context),
+      );
+    } else {
+      body = _content(context, day, profileModel); // 3) данные
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -36,77 +64,89 @@ class MyDayScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: AppConstants.paddingLarge),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppConstants.paddingMedium,
-              AppConstants.paddingSmall,
-              AppConstants.paddingMedium,
-              AppConstants.paddingMedium,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Доброе утро, ${MockData.userName}!',
-                        style: textTheme.headlineSmall,
+      body: body,
+    );
+  }
+
+  Widget _content(
+    BuildContext context,
+    DayPlanModel day,
+    ProfileModel profileModel,
+  ) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final profile = profileModel.profile!;
+    final plan = day.tasks;
+
+    return ListView(
+      padding: const EdgeInsets.only(bottom: AppConstants.paddingLarge),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppConstants.paddingMedium,
+            AppConstants.paddingSmall,
+            AppConstants.paddingMedium,
+            AppConstants.paddingMedium,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Доброе утро, ${profile.firstName}!',
+                      style: textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      day.dateLabel,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        MockData.todayLabel,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Chip(
-                  avatar: Icon(
-                    Icons.local_fire_department,
-                    color: scheme.tertiary,
-                  ),
-                  label: Text('${MockData.streakDays} дней'),
+              ),
+              Chip(
+                avatar: Icon(
+                  Icons.local_fire_department,
+                  color: scheme.tertiary,
                 ),
-              ],
-            ),
+                label: Text('${profile.streakDays} дней'),
+              ),
+            ],
           ),
-          const VerseCard(verse: MockData.verseOfDay, label: 'Стих дня'),
-          SectionHeader(
-            title: 'План на сегодня',
-            trailing: '$doneCount из ${plan.length}',
+        ),
+        VerseCard(verse: day.verseOfDay!, label: 'Стих дня'),
+        SectionHeader(
+          title: 'План на сегодня',
+          trailing: '${day.doneCount} из ${plan.length}',
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.paddingMedium,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingMedium,
-            ),
-            child: LinearProgressIndicator(
-              value: doneCount / plan.length,
-              minHeight: 6,
-              borderRadius: BorderRadius.circular(3),
-            ),
+          child: LinearProgressIndicator(
+            value: plan.isEmpty ? 0 : day.doneCount / plan.length,
+            minHeight: 6,
+            borderRadius: BorderRadius.circular(3),
           ),
-          const SizedBox(height: AppConstants.paddingSmall),
-          for (final task in plan)
-            DailyTaskTile(
-              task: task,
-              // ДЕЙСТВУЕМ — read в callback-е.
-              onToggle: () => context.read<DayPlanModel>().toggle(task.id),
-              // Пока открывается только отрывок из Библии.
-              onTap: task.type == DailyTaskType.reading
-                  ? () => context.push(
-                      '/bible/${MockData.lastReadBookId}/'
-                      '${MockData.lastReadChapter}',
-                    )
-                  : null,
-            ),
-        ],
-      ),
+        ),
+        const SizedBox(height: AppConstants.paddingSmall),
+        for (final task in plan)
+          DailyTaskTile(
+            task: task,
+            onToggle: () => _toggle(context, task),
+            // Пока открывается только отрывок из Библии.
+            onTap: task.type == DailyTaskType.reading
+                ? () => context.push(
+                    '/bible/${profile.lastReadBookId}/'
+                    '${profile.lastReadChapter}',
+                  )
+                : null,
+          ),
+      ],
     );
   }
 }
