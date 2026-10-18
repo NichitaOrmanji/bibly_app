@@ -35,74 +35,78 @@ class DiaryScreen extends StatelessWidget {
               message: model.error!,
               onRetry: () => context.read<DiaryModel>().load(),
             )
-          // 3) данные. ListView.builder: элемент 0 — вход в Скинию,
+          // 3) данные. Свайп вниз — обновить список из хранилища.
+          // ListView.builder: элемент 0 — вход в Скинию,
           // 1 — заголовок, дальше — записи дневника.
-          : ListView.builder(
-              // Нижний отступ, чтобы FAB не закрывал последнюю запись.
-              padding: const EdgeInsets.only(bottom: 88),
-              itemCount: entries.length + 2,
-              itemBuilder: (context, i) {
-                if (i == 0) {
-                  return Card(
-                    elevation: 0,
-                    color: scheme.secondaryContainer,
-                    margin: const EdgeInsets.fromLTRB(
-                      AppConstants.paddingMedium,
-                      AppConstants.paddingSmall,
-                      AppConstants.paddingMedium,
-                      0,
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: AppConstants.paddingMedium,
-                        vertical: AppConstants.paddingSmall,
+          : RefreshIndicator(
+              onRefresh: () => context.read<DiaryModel>().load(),
+              child: ListView.builder(
+                // Нижний отступ, чтобы FAB не закрывал последнюю запись.
+                padding: const EdgeInsets.only(bottom: 88),
+                itemCount: entries.length + 2,
+                itemBuilder: (context, i) {
+                  if (i == 0) {
+                    return Card(
+                      elevation: 0,
+                      color: scheme.secondaryContainer,
+                      margin: const EdgeInsets.fromLTRB(
+                        AppConstants.paddingMedium,
+                        AppConstants.paddingSmall,
+                        AppConstants.paddingMedium,
+                        0,
                       ),
-                      leading: CircleAvatar(
-                        backgroundColor: scheme.secondary,
-                        child: Icon(Icons.lock, color: scheme.onSecondary),
-                      ),
-                      title: Text(
-                        'Скиния',
-                        style: TextStyle(
-                          color: scheme.onSecondaryContainer,
-                          fontWeight: FontWeight.w600,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppConstants.paddingMedium,
+                          vertical: AppConstants.paddingSmall,
                         ),
+                        leading: CircleAvatar(
+                          backgroundColor: scheme.secondary,
+                          child: Icon(Icons.lock, color: scheme.onSecondary),
+                        ),
+                        title: Text(
+                          'Скиния',
+                          style: TextStyle(
+                            color: scheme.onSecondaryContainer,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Личные записи · ${model.privateEntries.length} · '
+                          'вход по паролю',
+                          style: TextStyle(color: scheme.onSecondaryContainer),
+                        ),
+                        trailing: Icon(
+                          Icons.chevron_right,
+                          color: scheme.onSecondaryContainer,
+                        ),
+                        onTap: () => context.push('/diary/unlock'),
                       ),
-                      subtitle: Text(
-                        'Личные записи · ${model.privateEntries.length} · '
-                        'вход по паролю',
-                        style: TextStyle(color: scheme.onSecondaryContainer),
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right,
-                        color: scheme.onSecondaryContainer,
-                      ),
-                      onTap: () => context.push('/diary/unlock'),
+                    );
+                  }
+                  if (i == 1) {
+                    return SectionHeader(
+                      title: 'Мои записи',
+                      trailing: '${entries.length}',
+                    );
+                  }
+                  final entry = entries[i - 2];
+                  // Свайп удаляет запись. Ключ — идентичность из данных
+                  // (ValueKey(id)), не UniqueKey: Flutter должен знать,
+                  // какая именно строка ушла.
+                  return Dismissible(
+                    key: ValueKey(entry.id),
+                    direction: DismissDirection.endToStart,
+                    background: const _DeleteBackground(),
+                    confirmDismiss: (_) => _confirmDelete(context, entry),
+                    child: DiaryEntryCard(
+                      entry: entry,
+                      // push + id в адресе: детали сами найдут запись.
+                      onTap: () => context.push('/diary/${entry.id}'),
                     ),
                   );
-                }
-                if (i == 1) {
-                  return SectionHeader(
-                    title: 'Мои записи',
-                    trailing: '${entries.length}',
-                  );
-                }
-                final entry = entries[i - 2];
-                // Свайп удаляет запись. Ключ — идентичность из данных
-                // (ValueKey(id)), не UniqueKey: Flutter должен знать,
-                // какая именно строка ушла.
-                return Dismissible(
-                  key: ValueKey(entry.id),
-                  direction: DismissDirection.endToStart,
-                  background: const _DeleteBackground(),
-                  confirmDismiss: (_) => _confirmDelete(context, entry),
-                  child: DiaryEntryCard(
-                    entry: entry,
-                    // push + id в адресе: детали сами найдут запись.
-                    onTap: () => context.push('/diary/${entry.id}'),
-                  ),
-                );
-              },
+                },
+              ),
             ),
     );
   }
