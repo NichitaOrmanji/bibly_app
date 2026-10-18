@@ -48,5 +48,5 @@ app.*.map.json
 .widget_preview/
 
 # Сгенерированный отчёт (собирается docs/report/build_report.py)
-/docs/report/PAM_L2_*.html
-/docs/report/PAM_L2_*.pdf
+/docs/report/PAM_L*.html
+/docs/report/PAM_L*.pdf
