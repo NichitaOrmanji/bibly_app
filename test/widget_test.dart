@@ -126,6 +126,8 @@ void main() {
     await tester.scrollUntilVisible(find.text('Выйти'), 200);
     await tester.tap(find.text('Выйти'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Да, выйти'));
+    await tester.pumpAndSettle();
     expect(find.text('Войти'), findsOneWidget);
   });
 
@@ -248,5 +250,34 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Мои записи'), findsOneWidget); // форма закрылась
+  });
+
+  testWidgets('Logout asks for confirmation; back does not return to login', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const BiblyApp());
+    await logIn(tester);
+
+    // После входа стек — это /day: возвращаться на вход некуда.
+    expect(router.canPop(), isFalse);
+
+    router.go('/profile');
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Выйти'), 200);
+    await tester.tap(find.text('Выйти'));
+    await tester.pumpAndSettle();
+    expect(find.text('Выйти из аккаунта?'), findsOneWidget);
+
+    await tester.tap(find.text('Отмена'));
+    await tester.pumpAndSettle();
+    expect(find.text('Выйти из аккаунта?'), findsNothing);
+    expect(find.byType(NavigationBar), findsOneWidget); // остались в профиле
+
+    await tester.tap(find.text('Выйти'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Да, выйти'));
+    await tester.pumpAndSettle();
+    expect(find.byType(NavigationBar), findsNothing); // экран входа
+    expect(find.text('Войти'), findsOneWidget);
   });
 }

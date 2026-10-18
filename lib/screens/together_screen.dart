@@ -203,7 +203,14 @@ class _ActivityCard extends StatelessWidget {
                   ),
                 ),
                 TextButton.icon(
-                  onPressed: () {},
+                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Вы помолитесь: ${activity.name.split(' ').first} '
+                        'получит уведомление',
+                      ),
+                    ),
+                  ),
                   icon: const Icon(Icons.volunteer_activism_outlined, size: 18),
                   label: Text('Помолюсь · ${activity.prayers}'),
                 ),

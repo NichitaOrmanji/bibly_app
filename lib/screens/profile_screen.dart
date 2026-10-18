@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../data/mock_data.dart';
 import '../utils/app_constants.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/initials_avatar.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_tile.dart';
@@ -40,6 +41,20 @@ const List<_Setting> _settings = [
   _Setting(Icons.language, 'Язык приложения', value: 'Русский'),
   _Setting(Icons.info_outline, 'О приложении', value: 'версия 0.2.0'),
 ];
+
+/// Выход: сначала подтверждение, затем go на вход.
+Future<void> _logout(BuildContext context) async {
+  final ok = await showConfirmDialog(
+    context,
+    title: 'Выйти из аккаунта?',
+    message: 'Чтобы снова открыть дневник и планы, нужно будет войти.',
+    confirmLabel: 'Да, выйти',
+  );
+  // После await пользуемся context только если экран ещё на месте.
+  if (ok && context.mounted) {
+    context.go('/login'); // go: раздел с вкладками целиком уходит из стека
+  }
+}
 
 /// «Профиль» — данные пользователя, статистика и настройки.
 /// Переключатели статические: значения берутся из списка выше.
@@ -140,8 +155,7 @@ class ProfileScreen extends StatelessWidget {
                 foregroundColor: scheme.error,
                 minimumSize: const Size.fromHeight(48),
               ),
-              // go: раздел с вкладками целиком уходит из стека.
-              onPressed: () => context.go('/login'),
+              onPressed: () => _logout(context),
               icon: const Icon(Icons.logout),
               label: const Text('Выйти'),
             ),

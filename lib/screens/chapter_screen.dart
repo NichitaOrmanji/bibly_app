@@ -47,7 +47,9 @@ class ChapterScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Закладка',
             icon: const Icon(Icons.bookmark_border),
-            onPressed: () {},
+            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Закладка: ${book.name} $chapter')),
+            ),
           ),
         ],
       ),

@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/mock_data.dart';
 import '../utils/app_constants.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/initials_avatar.dart';
 import '../widgets/section_header.dart';
+
+/// Выход из группы: подтверждение → SnackBar → назад.
+Future<void> _leave(BuildContext context, String name) async {
+  final ok = await showConfirmDialog(
+    context,
+    title: 'Покинуть группу?',
+    message: 'Вы перестанете видеть прогресс и записи группы «$name».',
+    confirmLabel: 'Покинуть',
+  );
+  if (ok && context.mounted) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Вы покинули группу «$name»')));
+    context.pop();
+  }
+}
 
 /// Группа — адрес /together/:groupId. План, прогресс и участники.
 class GroupScreen extends StatelessWidget {
@@ -56,7 +73,7 @@ class GroupScreen extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: scheme.error,
                         ),
-                        onPressed: () {},
+                        onPressed: () => _leave(context, group.name),
                         icon: const Icon(Icons.exit_to_app),
                         label: const Text('Покинуть группу'),
                       ),

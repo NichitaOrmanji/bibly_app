@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/mock_data.dart';
 import '../utils/app_constants.dart';
+import '../widgets/confirm_dialog.dart';
+
+/// Удаление: подтверждение → SnackBar → назад к списку.
+/// Запись на самом деле не исчезает — состояние появится в ЛР4.
+Future<void> _delete(BuildContext context, String title) async {
+  final ok = await showConfirmDialog(
+    context,
+    title: 'Удалить запись?',
+    message: '«$title» будет удалена без возможности восстановления.',
+    confirmLabel: 'Удалить',
+  );
+  if (ok && context.mounted) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Запись «$title» удалена')));
+    context.pop();
+  }
+}
 
 /// Запись дневника — адреса /diary/:id и /diary/tabernacle/:id.
 /// Экран получает id из адреса и сам ищет запись (сначала в Дневнике,
@@ -27,7 +45,7 @@ class EntryScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Удалить',
             icon: const Icon(Icons.delete_outline),
-            onPressed: () {},
+            onPressed: () => _delete(context, entry.title),
           ),
         ],
       ),
