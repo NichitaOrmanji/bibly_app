@@ -60,7 +60,7 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Редактировать',
             icon: const Icon(Icons.edit_outlined),
-            onPressed: () {},
+            onPressed: () => context.push('/profile/edit'),
           ),
         ],
       ),

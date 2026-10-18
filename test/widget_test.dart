@@ -3,8 +3,21 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bibly_app/main.dart';
 import 'package:bibly_app/router.dart';
+import 'package:bibly_app/screens/new_entry_screen.dart';
+import 'package:bibly_app/utils/validators.dart';
 import 'package:bibly_app/widgets/book_tile.dart';
 import 'package:bibly_app/widgets/initials_avatar.dart';
+
+/// Вводит корректные данные и нажимает «Войти».
+Future<void> logIn(WidgetTester tester) async {
+  await tester.enterText(
+    find.byType(TextFormField).at(0),
+    'nikita@example.com',
+  );
+  await tester.enterText(find.byType(TextFormField).at(1), 'secret12');
+  await tester.tap(find.text('Войти'));
+  await tester.pumpAndSettle();
+}
 
 void main() {
   // router — глобальный объект и помнит адрес между тестами:
@@ -14,11 +27,10 @@ void main() {
   testWidgets('Login screen is static and leads to My day', (tester) async {
     await tester.pumpWidget(const BiblyApp());
 
-    expect(find.byType(TextField), findsNWidgets(2));
+    expect(find.byType(TextFormField), findsNWidgets(2));
     expect(find.text('Войти'), findsOneWidget);
 
-    await tester.tap(find.text('Войти'));
-    await tester.pumpAndSettle();
+    await logIn(tester);
     expect(find.text('Стих дня'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
   });
@@ -38,8 +50,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(const BiblyApp());
-    await tester.tap(find.text('Войти'));
-    await tester.pumpAndSettle();
+    await logIn(tester);
     expect(tester.takeException(), isNull);
 
     await tester.tap(find.text('Вместе'));
@@ -51,8 +62,7 @@ void main() {
 
   testWidgets('Bible tab lists books of both testaments', (tester) async {
     await tester.pumpWidget(const BiblyApp());
-    await tester.tap(find.text('Войти'));
-    await tester.pumpAndSettle();
+    await logIn(tester);
 
     await tester.tap(find.text('Библия'));
     await tester.pumpAndSettle();
@@ -71,8 +81,7 @@ void main() {
 
   testWidgets('Diary opens Tabernacle via password screen', (tester) async {
     await tester.pumpWidget(const BiblyApp());
-    await tester.tap(find.text('Войти'));
-    await tester.pumpAndSettle();
+    await logIn(tester);
 
     await tester.tap(find.text('Дневник'));
     await tester.pumpAndSettle();
@@ -82,6 +91,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Пароль Скинии'), findsOneWidget);
 
+    await tester.enterText(find.byType(TextFormField), '1234');
     await tester.tap(find.text('Открыть'));
     await tester.pumpAndSettle();
     expect(find.text('Эти записи видны только вам'), findsOneWidget);
@@ -90,8 +100,7 @@ void main() {
 
   testWidgets('Continue reading opens the chapter', (tester) async {
     await tester.pumpWidget(const BiblyApp());
-    await tester.tap(find.text('Войти'));
-    await tester.pumpAndSettle();
+    await logIn(tester);
 
     await tester.tap(find.text('Библия'));
     await tester.pumpAndSettle();
@@ -102,11 +111,11 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Profile shows stats and settings, logout returns to login',
-      (tester) async {
+  testWidgets('Profile shows stats and settings, logout returns to login', (
+    tester,
+  ) async {
     await tester.pumpWidget(const BiblyApp());
-    await tester.tap(find.text('Войти'));
-    await tester.pumpAndSettle();
+    await logIn(tester);
 
     await tester.tap(find.text('Профиль').last);
     await tester.pumpAndSettle();
@@ -127,8 +136,7 @@ void main() {
 
   testWidgets('Search opens from My day and shows results', (tester) async {
     await tester.pumpWidget(const BiblyApp());
-    await tester.tap(find.text('Войти'));
-    await tester.pumpAndSettle();
+    await logIn(tester);
 
     await tester.tap(find.byTooltip('Поиск'));
     await tester.pumpAndSettle();
@@ -137,8 +145,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Detail screens find their object by id from the address',
-      (tester) async {
+  testWidgets('Detail screens find their object by id from the address', (
+    tester,
+  ) async {
     await tester.pumpWidget(const BiblyApp());
 
     router.go('/bible/1');
@@ -162,5 +171,82 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Студенты УТМ'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Login rejects invalid data and stays on the login screen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const BiblyApp());
+
+    await tester.tap(find.text('Войти'));
+    await tester.pump();
+    expect(find.text('Введите e-mail'), findsOneWidget);
+    expect(find.text('Введите пароль'), findsOneWidget);
+
+    await tester.enterText(
+      find.byType(TextFormField).at(0),
+      'nikita.example.com',
+    );
+    await tester.enterText(find.byType(TextFormField).at(1), '123');
+    await tester.tap(find.text('Войти'));
+    await tester.pump();
+    expect(find.text('Неверный формат e-mail'), findsOneWidget);
+    expect(find.text('Минимум 6 символов'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing); // всё ещё на входе
+  });
+
+  test('Verse reference is checked against real books and chapters', () {
+    expect(Validators.verseReference(''), isNull); // необязательное поле
+    expect(Validators.verseReference('Ин 3:16'), isNull);
+    expect(Validators.verseReference('1 Кор 13'), isNull);
+    expect(Validators.verseReference('Ин'), 'Формат: «Ин 3:16» или «1 Кор 13»');
+    expect(Validators.verseReference('Абв 1'), 'Нет такой книги: «Абв»');
+    expect(Validators.verseReference('Ин 22'), 'В книге «От Иоанна» глав: 21');
+  });
+
+  test('Tabernacle PIN and phone rules', () {
+    expect(Validators.tabernaclePin(''), 'Введите пароль Скинии');
+    expect(Validators.tabernaclePin('12'), 'От 4 до 6 цифр');
+    expect(Validators.tabernaclePin('1234'), isNull);
+    expect(Validators.phone(''), isNull);
+    expect(Validators.phone('69123456'), isNotNull);
+    expect(Validators.phone('069123456'), isNull);
+  });
+
+  testWidgets('New entry form shows errors, then saves with a SnackBar', (
+    tester,
+  ) async {
+    // Высокий экран: вся форма помещается над панелью вкладок.
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(const BiblyApp());
+    await logIn(tester);
+    router.go('/diary');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Новая запись'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Сохранить'));
+    await tester.pump();
+    expect(find.text('Заголовок обязателен'), findsOneWidget);
+    expect(find.text('Напишите хотя бы пару слов'), findsOneWidget);
+    expect(find.text('Выберите, куда сохранить запись'), findsOneWidget);
+
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'Утро с Псалмом');
+    await tester.enterText(fields.at(1), 'Пс 22');
+    await tester.enterText(fields.at(2), 'Перечитал Псалом 22 перед парами.');
+    await tester.tap(find.byType(DropdownButtonFormField<EntryPlace>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Дневник — видна группе').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Сохранить'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Запись «Утро с Псалмом» сохранена в Дневник'),
+      findsOneWidget,
+    );
+    expect(find.text('Мои записи'), findsOneWidget); // форма закрылась
   });
 }

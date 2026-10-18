@@ -18,7 +18,7 @@ class DiaryScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Дневник')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () => context.push('/diary/new'),
         icon: const Icon(Icons.history_edu),
         label: const Text('Новая запись'),
       ),

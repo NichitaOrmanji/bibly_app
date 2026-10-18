@@ -120,7 +120,14 @@ class ChapterScreen extends StatelessWidget {
               ),
               const Spacer(),
               FilledButton.tonalIcon(
-                onPressed: () {},
+                // go: переход в другой раздел (вкладку «Дневник»);
+                // ссылка на главу передаётся query-параметром.
+                onPressed: () => context.go(
+                  Uri(
+                    path: '/diary/new',
+                    queryParameters: {'verse': '${book.abbreviation} $chapter'},
+                  ).toString(),
+                ),
                 icon: const Icon(Icons.history_edu),
                 label: const Text('В дневник'),
               ),

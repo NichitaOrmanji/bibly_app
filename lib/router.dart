@@ -8,6 +8,8 @@ import 'screens/entry_screen.dart';
 import 'screens/group_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/my_day_screen.dart';
+import 'screens/new_entry_screen.dart';
+import 'screens/profile_edit_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/search_screen.dart';
 import 'screens/tabernacle_lock_screen.dart';
@@ -80,6 +82,21 @@ final router = GoRouter(
               // маршруты пробуются сверху вниз.
               routes: [
                 GoRoute(
+                  // /diary/new — фиксированный сегмент, стоит ПЕРЕД ':id',
+                  // иначе «new» попал бы в int.parse и приложение упало бы.
+                  path: 'new',
+                  builder: (context, state) {
+                    // Необязательные query-параметры: ?verse=Ин 3&place=tabernacle
+                    final query = state.uri.queryParameters;
+                    return NewEntryScreen(
+                      initialVerse: query['verse'],
+                      initialPlace: query['place'] == 'tabernacle'
+                          ? EntryPlace.tabernacle
+                          : null,
+                    );
+                  },
+                ),
+                GoRoute(
                   path: 'unlock', // /diary/unlock — пароль Скинии
                   builder: (context, state) => const TabernacleLockScreen(),
                 ),
@@ -125,6 +142,12 @@ final router = GoRouter(
             GoRoute(
               path: '/profile',
               builder: (context, state) => const ProfileScreen(),
+              routes: [
+                GoRoute(
+                  path: 'edit', // /profile/edit
+                  builder: (context, state) => const ProfileEditScreen(),
+                ),
+              ],
             ),
           ],
         ),

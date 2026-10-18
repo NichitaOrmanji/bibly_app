@@ -26,7 +26,7 @@ class TabernacleScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () => context.push('/diary/new?place=tabernacle'),
         icon: const Icon(Icons.history_edu),
         label: const Text('Личная запись'),
       ),
