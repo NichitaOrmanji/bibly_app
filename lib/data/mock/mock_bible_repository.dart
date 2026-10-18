@@ -60,4 +60,10 @@ class MockBibleRepository implements BibleRepository {
           v,
     ]);
   }
+
+  @override
+  Future<Result<List<String>>> fetchRecentSearches() async {
+    if (!await _net.roundTrip()) return const Err(MockNetwork.errNetwork);
+    return Ok(List.of(MockData.recentSearches));
+  }
 }

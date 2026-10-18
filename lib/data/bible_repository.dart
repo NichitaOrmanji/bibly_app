@@ -7,8 +7,10 @@ import 'result.dart';
 ///   fetchBooks()               → GET /books
 ///   fetchChapter(book, number) → GET /books/{id}/chapters/{n} (Err при 404)
 ///   search(query)              → GET /search?q=...
+///   fetchRecentSearches()      → GET /me/searches
 abstract class BibleRepository {
   Future<Result<List<BibleBook>>> fetchBooks();
   Future<Result<ChapterText>> fetchChapter(int bookId, int chapter);
   Future<Result<List<Verse>>> search(String query);
+  Future<Result<List<String>>> fetchRecentSearches();
 }

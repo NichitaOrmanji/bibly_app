@@ -33,10 +33,16 @@ class BibleModel extends ChangeNotifier {
     _loading = true;
     _error = null;
     notifyListeners();
-    switch (await _repository.fetchBooks()) {
-      case Ok(:final value):
-        _books = value;
-      case Err(:final msg):
+    // Книги и недавние запросы — параллельно.
+    final (books, recent) = await (
+      _repository.fetchBooks(),
+      _repository.fetchRecentSearches(),
+    ).wait;
+    switch ((books, recent)) {
+      case (Ok(value: final b), Ok(value: final r)):
+        _books = b;
+        _recent = r;
+      case (Err(:final msg), _) || (_, Err(:final msg)):
         _error = msg;
     }
     _loading = false;
@@ -77,11 +83,13 @@ class BibleModel extends ChangeNotifier {
   String? _searchError;
   String _query = '';
   List<Verse> _results = const [];
+  List<String> _recent = const [];
 
   bool get isSearching => _searching;
   String? get searchError => _searchError;
   String get query => _query;
   List<Verse> get results => List.unmodifiable(_results);
+  List<String> get recentSearches => List.unmodifiable(_recent);
 
   Future<void> search(String query) async {
     _query = query.trim();
@@ -91,6 +99,11 @@ class BibleModel extends ChangeNotifier {
     switch (await _repository.search(_query)) {
       case Ok(:final value):
         _results = value;
+        // Удачный запрос — в начало «недавних», без повторов, не больше 8.
+        _recent = [
+          _query,
+          ..._recent.where((q) => q != _query),
+        ].take(8).toList();
       case Err(:final msg):
         _searchError = msg;
     }

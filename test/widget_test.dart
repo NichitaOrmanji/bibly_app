@@ -142,8 +142,17 @@ void main() {
 
     await tester.tap(find.byTooltip('Поиск'));
     await tester.pumpAndSettle();
-    expect(find.text('Найдено стихов: 7'), findsOneWidget);
+    expect(find.text('Введите слово или ссылку на стих'), findsOneWidget);
     expect(find.byType(FilterChip), findsNWidgets(4));
+
+    await tester.enterText(find.byType(TextField), 'любовь');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+    expect(find.text('Найдено стихов: 7'), findsOneWidget);
+
+    await tester.tap(find.text('Мой дневник'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Найдено записей:'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
