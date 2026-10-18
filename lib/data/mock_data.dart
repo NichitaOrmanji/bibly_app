@@ -35,6 +35,7 @@ class MockData {
   /// цитата → отрывок из Библии → размышление → призыв к молитве.
   static const List<DailyTask> todayPlan = [
     DailyTask(
+      id: 1,
       title: 'Цитата дня',
       subtitle: '«Молитва не меняет Бога, но меняет молящегося» — С. Кьеркегор',
       minutes: 1,
@@ -42,6 +43,7 @@ class MockData {
       isDone: true,
     ),
     DailyTask(
+      id: 2,
       title: 'Отрывок из Библии',
       subtitle: 'Ин 3:1–21 · Беседа Иисуса с Никодимом',
       minutes: 7,
@@ -49,12 +51,14 @@ class MockData {
       isDone: true,
     ),
     DailyTask(
+      id: 3,
       title: 'Размышление',
       subtitle: 'Что значит «родиться свыше»?',
       minutes: 5,
       type: DailyTaskType.reflection,
     ),
     DailyTask(
+      id: 4,
       title: 'Призыв к молитве',
       subtitle: 'Помолитесь о тех, кто ищет ответы, как Никодим',
       minutes: 3,

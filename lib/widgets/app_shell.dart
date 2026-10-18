@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../models/day_plan_model.dart';
 
 /// Обёртка с постоянными вкладками. Текущий индекс знает router
 /// ([StatefulNavigationShell]), поэтому виджет — StatelessWidget:
@@ -18,8 +21,8 @@ class AppShell extends StatelessWidget {
         onDestinationSelected: navigationShell.goBranch, // переключает вкладку
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.wb_sunny_outlined),
-            selectedIcon: Icon(Icons.wb_sunny),
+            icon: _PlanBadge(child: Icon(Icons.wb_sunny_outlined)),
+            selectedIcon: _PlanBadge(child: Icon(Icons.wb_sunny)),
             label: 'Мой день',
           ),
           NavigationDestination(
@@ -45,6 +48,26 @@ class AppShell extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Бейдж «сколько пунктов плана осталось». Один «живой угол» — Consumer:
+/// при изменении плана перерисовывается только бейдж, а не вся панель.
+class _PlanBadge extends StatelessWidget {
+  final Widget child;
+
+  const _PlanBadge({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<DayPlanModel>(
+      builder: (context, plan, child) => Badge(
+        isLabelVisible: plan.remaining > 0,
+        label: Text('${plan.remaining}'),
+        child: child,
+      ),
+      child: child,
     );
   }
 }

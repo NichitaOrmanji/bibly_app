@@ -3,12 +3,18 @@ import 'package:flutter/material.dart';
 import '../models/daily_task.dart';
 
 /// Строка плана на день: иконка вида, название, подпись, длительность
-/// и отметка выполнения. Отметка статическая — берётся из данных.
+/// и отметка выполнения. Нажатие на отметку вызывает [onToggle].
 class DailyTaskTile extends StatelessWidget {
   final DailyTask task;
   final VoidCallback? onTap;
+  final VoidCallback? onToggle;
 
-  const DailyTaskTile({super.key, required this.task, this.onTap});
+  const DailyTaskTile({
+    super.key,
+    required this.task,
+    this.onTap,
+    this.onToggle,
+  });
 
   static IconData _iconFor(DailyTaskType type) {
     switch (type) {
@@ -49,9 +55,13 @@ class DailyTaskTile extends StatelessWidget {
             : null,
       ),
       subtitle: Text('${task.subtitle} · ${task.minutes} мин'),
-      trailing: Icon(
-        task.isDone ? Icons.check_circle : Icons.radio_button_unchecked,
-        color: task.isDone ? scheme.primary : scheme.outline,
+      trailing: IconButton(
+        tooltip: task.isDone ? 'Снять отметку' : 'Отметить выполненным',
+        onPressed: onToggle,
+        icon: Icon(
+          task.isDone ? Icons.check_circle : Icons.radio_button_unchecked,
+          color: task.isDone ? scheme.primary : scheme.outline,
+        ),
       ),
       onTap: onTap,
     );

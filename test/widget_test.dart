@@ -25,7 +25,7 @@ void main() {
   setUp(() => router.go('/login'));
 
   testWidgets('Login screen is static and leads to My day', (tester) async {
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
 
     expect(find.byType(TextFormField), findsNWidgets(2));
     expect(find.text('Войти'), findsOneWidget);
@@ -40,7 +40,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
     expect(tester.takeException(), isNull);
   });
 
@@ -49,7 +49,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
     await logIn(tester);
     expect(tester.takeException(), isNull);
 
@@ -61,7 +61,7 @@ void main() {
   });
 
   testWidgets('Bible tab lists books of both testaments', (tester) async {
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
     await logIn(tester);
 
     await tester.tap(find.text('Библия'));
@@ -80,7 +80,7 @@ void main() {
   });
 
   testWidgets('Diary opens Tabernacle via password screen', (tester) async {
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
     await logIn(tester);
 
     await tester.tap(find.text('Дневник'));
@@ -99,7 +99,7 @@ void main() {
   });
 
   testWidgets('Continue reading opens the chapter', (tester) async {
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
     await logIn(tester);
 
     await tester.tap(find.text('Библия'));
@@ -114,7 +114,7 @@ void main() {
   testWidgets('Profile shows stats and settings, logout returns to login', (
     tester,
   ) async {
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
     await logIn(tester);
 
     await tester.tap(find.text('Профиль').last);
@@ -137,7 +137,7 @@ void main() {
   });
 
   testWidgets('Search opens from My day and shows results', (tester) async {
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
     await logIn(tester);
 
     await tester.tap(find.byTooltip('Поиск'));
@@ -150,7 +150,7 @@ void main() {
   testWidgets('Detail screens find their object by id from the address', (
     tester,
   ) async {
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
 
     router.go('/bible/1');
     await tester.pumpAndSettle();
@@ -178,7 +178,7 @@ void main() {
   testWidgets('Login rejects invalid data and stays on the login screen', (
     tester,
   ) async {
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
 
     await tester.tap(find.text('Войти'));
     await tester.pump();
@@ -222,7 +222,7 @@ void main() {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
     await logIn(tester);
     router.go('/diary');
     await tester.pumpAndSettle();
@@ -255,7 +255,7 @@ void main() {
   testWidgets('Logout asks for confirmation; back does not return to login', (
     tester,
   ) async {
-    await tester.pumpWidget(const BiblyApp());
+    await tester.pumpWidget(createApp());
     await logIn(tester);
 
     // После входа стек — это /day: возвращаться на вход некуда.
@@ -279,5 +279,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(NavigationBar), findsNothing); // экран входа
     expect(find.text('Войти'), findsOneWidget);
+  });
+
+  testWidgets('Toggling a task updates progress and the tab badge', (
+    tester,
+  ) async {
+    // Высокий экран: весь план помещается без прокрутки.
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(createApp());
+    await logIn(tester);
+
+    expect(find.text('2 из 4'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget); // бейдж «осталось 2»
+
+    await tester.tap(find.byTooltip('Отметить выполненным').first);
+    await tester.pumpAndSettle();
+    expect(find.text('3 из 4'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget); // бейдж на вкладке уменьшился
   });
 }

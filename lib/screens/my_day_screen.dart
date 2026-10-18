@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../data/mock_data.dart';
 import '../models/daily_task.dart';
+import '../models/day_plan_model.dart';
 import '../utils/app_constants.dart';
 import '../widgets/daily_task_tile.dart';
 import '../widgets/section_header.dart';
 import '../widgets/verse_card.dart';
 
 /// «Мой день» — главный экран: приветствие, серия дней, стих дня
-/// и план на сегодня. Все данные из [MockData].
+/// и план на сегодня. Отметки плана — в [DayPlanModel].
 class MyDayScreen extends StatelessWidget {
   const MyDayScreen({super.key});
 
@@ -17,8 +19,11 @@ class MyDayScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    const plan = MockData.todayPlan;
-    final doneCount = plan.where((t) => t.isDone).length;
+    // ПОКАЗЫВАЕМ и следим — watch в build: экран перерисуется
+    // при каждом notifyListeners модели.
+    final planModel = context.watch<DayPlanModel>();
+    final plan = planModel.tasks;
+    final doneCount = planModel.doneCount;
 
     return Scaffold(
       appBar: AppBar(
@@ -90,6 +95,8 @@ class MyDayScreen extends StatelessWidget {
           for (final task in plan)
             DailyTaskTile(
               task: task,
+              // ДЕЙСТВУЕМ — read в callback-е.
+              onToggle: () => context.read<DayPlanModel>().toggle(task.id),
               // Пока открывается только отрывок из Библии.
               onTap: task.type == DailyTaskType.reading
                   ? () => context.push(
