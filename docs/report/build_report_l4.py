@@ -72,8 +72,10 @@ PROBLEMS = [
 ]
 
 EXTRA_CSS = """
+.shots { gap: 4mm; }
+img.shot { width: 39mm; }
 figure { margin: 0; text-align: center; }
-figcaption { font-size: 9pt; color: #444; margin-top: 2pt; max-width: 41mm; }
+figcaption { font-size: 9pt; color: #444; margin-top: 2pt; max-width: 39mm; }
 .small-table { font-size: 10pt; }
 img.diagram { width: 100%; border: 1px solid #ddd; border-radius: 3mm; }
 """

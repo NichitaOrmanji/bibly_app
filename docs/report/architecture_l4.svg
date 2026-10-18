@@ -73,8 +73,9 @@
   <rect x="600" y="170" width="160" height="100" rx="12" fill="#FFEBEE" stroke="#B71C1C" stroke-width="1.2" stroke-dasharray="4 3"/>
   <text x="612" y="193" font-weight="700" fill="#B71C1C">Переключатель</text>
   <text x="612" y="211" font-weight="700" fill="#B71C1C">аварии (Профиль)</text>
-  <text x="612" y="231" font-size="12">setState + read&lt;MockNetwork&gt;()</text>
-  <text x="612" y="249" font-size="12">— леса, исчезают на ЛР5</text>
+  <text x="612" y="229" font-size="12">setState +</text>
+  <text x="612" y="245" font-size="12">read&lt;MockNetwork&gt;()</text>
+  <text x="612" y="261" font-size="12">— леса, уйдут на ЛР5</text>
   <line x1="680" y1="270" x2="440" y2="470" stroke="#B71C1C" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#r)"/>
-  <text x="565" y="350" fill="#B71C1C" font-size="12">simulateError</text>
+  <text x="596" y="300" fill="#B71C1C" font-size="12">simulateError</text>
 </svg>
