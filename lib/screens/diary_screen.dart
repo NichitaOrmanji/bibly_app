@@ -74,7 +74,12 @@ class DiaryScreen extends StatelessWidget {
               trailing: '${entries.length}',
             );
           }
-          return DiaryEntryCard(entry: entries[i - 2]);
+          final entry = entries[i - 2];
+          return DiaryEntryCard(
+            entry: entry,
+            // push + id в адресе: детали сами найдут запись.
+            onTap: () => context.push('/diary/${entry.id}'),
+          );
         },
       ),
     );

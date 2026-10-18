@@ -7,8 +7,9 @@ import '../utils/app_constants.dart';
 /// Одна и та же карточка используется в «Дневнике» и в «Скинии».
 class DiaryEntryCard extends StatelessWidget {
   final DiaryEntry entry;
+  final VoidCallback? onTap;
 
-  const DiaryEntryCard({super.key, required this.entry});
+  const DiaryEntryCard({super.key, required this.entry, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class DiaryEntryCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        onTap: () {},
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.paddingMedium),
           child: Column(

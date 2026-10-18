@@ -53,7 +53,11 @@ class TabernacleScreen extends StatelessWidget {
               ),
             );
           }
-          return DiaryEntryCard(entry: entries[i - 1]);
+          final entry = entries[i - 1];
+          return DiaryEntryCard(
+            entry: entry,
+            onTap: () => context.push('/diary/tabernacle/${entry.id}'),
+          );
         },
       ),
     );

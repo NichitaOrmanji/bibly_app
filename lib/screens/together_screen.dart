@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/mock_data.dart';
 import '../models/community.dart';
@@ -41,7 +42,10 @@ class TogetherScreen extends StatelessWidget {
               itemCount: groups.length,
               separatorBuilder: (_, _) =>
                   const SizedBox(width: AppConstants.paddingSmall),
-              itemBuilder: (context, i) => _GroupCard(group: groups[i]),
+              itemBuilder: (context, i) => _GroupCard(
+                group: groups[i],
+                onTap: () => context.push('/together/${groups[i].id}'),
+              ),
             ),
           ),
           const SectionHeader(title: 'Лента друзей'),
@@ -55,8 +59,9 @@ class TogetherScreen extends StatelessWidget {
 /// Карточка группы в горизонтальном списке.
 class _GroupCard extends StatelessWidget {
   final ReadingGroup group;
+  final VoidCallback? onTap;
 
-  const _GroupCard({required this.group});
+  const _GroupCard({required this.group, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -69,60 +74,64 @@ class _GroupCard extends StatelessWidget {
         elevation: 0,
         margin: EdgeInsets.zero,
         color: scheme.secondaryContainer,
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                group.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: textTheme.titleSmall?.copyWith(
-                  color: scheme.onSecondaryContainer,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                group.plan,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: textTheme.bodySmall?.copyWith(
-                  color: scheme.onSecondaryContainer,
-                ),
-              ),
-              const Spacer(),
-              LinearProgressIndicator(
-                value: group.progress,
-                minHeight: 6,
-                borderRadius: BorderRadius.circular(3),
-              ),
-              const SizedBox(height: AppConstants.paddingSmall),
-              Row(
-                children: [
-                  Icon(
-                    Icons.group_outlined,
-                    size: 16,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  group.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleSmall?.copyWith(
                     color: scheme.onSecondaryContainer,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${group.members}',
-                    style: textTheme.labelMedium?.copyWith(
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  group.plan,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: scheme.onSecondaryContainer,
+                  ),
+                ),
+                const Spacer(),
+                LinearProgressIndicator(
+                  value: group.progress,
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                const SizedBox(height: AppConstants.paddingSmall),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.group_outlined,
+                      size: 16,
                       color: scheme.onSecondaryContainer,
                     ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${(group.progress * 100).round()}%',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: scheme.onSecondaryContainer,
-                      fontWeight: FontWeight.w700,
+                    const SizedBox(width: 4),
+                    Text(
+                      '${group.members}',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: scheme.onSecondaryContainer,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    const Spacer(),
+                    Text(
+                      '${(group.progress * 100).round()}%',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: scheme.onSecondaryContainer,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

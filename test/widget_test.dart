@@ -136,4 +136,31 @@ void main() {
     expect(find.byType(FilterChip), findsNWidgets(4));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Detail screens find their object by id from the address',
+      (tester) async {
+    await tester.pumpWidget(const BiblyApp());
+
+    router.go('/bible/1');
+    await tester.pumpAndSettle();
+    expect(find.text('Бытие'), findsOneWidget);
+    expect(find.text('50'), findsOneWidget); // последняя глава в сетке
+
+    router.go('/bible/43/3');
+    await tester.pumpAndSettle();
+    expect(find.text('Беседа Иисуса с Никодимом'), findsOneWidget);
+
+    router.go('/diary/2');
+    await tester.pumpAndSettle();
+    expect(find.text('Господь — Пастырь мой'), findsOneWidget);
+
+    router.go('/diary/tabernacle/101');
+    await tester.pumpAndSettle();
+    expect(find.text('Молитва о маме'), findsOneWidget);
+
+    router.go('/together/2');
+    await tester.pumpAndSettle();
+    expect(find.text('Студенты УТМ'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

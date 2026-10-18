@@ -53,3 +53,17 @@ StatefulShellRoute.indexedStack (AppShell + NavigationBar)
 - Проблема: после перехода на `GoRouter` 6 тестов упали, хотя по одному проходили. Причина —
   `router` глобальный и помнит адрес между тестами. Решение: `setUp(() => router.go('/login'))`.
 - Проверка: `flutter analyze` — без замечаний; 10 тестов пройдены.
+
+### Шаг 4. Цепочки «список → детали» с /:id
+- Переиспользуемые карточки получили `onTap` (место, оставленное в ЛР2):
+  `BookTile` (уже был), `DiaryEntryCard` (новый параметр), `_GroupCard` во «Вместе».
+- Новые экраны деталей — каждый получает id из адреса и **сам ищет объект** через
+  `firstWhere` (без `extra`):
+  - `BookScreen` (`/bible/:bookId`) — сетка глав (`GridView.builder`), последняя
+    прочитанная глава подсвечена; нажатие → `push('/bible/43/3')`;
+  - `EntryScreen` (`/diary/:id` и `/diary/tabernacle/:id`) — полная запись;
+  - `GroupScreen` (`/together/:groupId`) — план, прогресс, участники.
+- Порядок маршрутов: фиксированные `/diary/unlock` и `/diary/tabernacle` стоят выше
+  переменного `/diary/:id`, иначе «unlock» попал бы в `int.parse` и приложение упало бы.
+- Новый тест: адреса `/bible/1`, `/bible/43/3`, `/diary/2`, `/diary/tabernacle/101`,
+  `/together/2` открывают правильные объекты. 11 тестов пройдены.

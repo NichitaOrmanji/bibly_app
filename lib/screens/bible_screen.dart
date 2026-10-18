@@ -38,7 +38,10 @@ class BibleScreen extends StatelessWidget {
           if (i == 0) return const _ContinueReadingCard();
 
           final book = books[i - 1];
-          final tile = BookTile(book: book, onTap: () {});
+          final tile = BookTile(
+            book: book,
+            onTap: () => context.push('/bible/${book.id}'),
+          );
 
           // Заголовок завета ставим перед первой книгой каждого завета.
           final startsTestament =
