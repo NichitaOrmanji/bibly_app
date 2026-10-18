@@ -108,6 +108,13 @@ final router = GoRouter(
                       path: ':id', // /diary/tabernacle/101
                       builder: (context, state) =>
                           EntryScreen(id: _param(state, 'id')),
+                      routes: [
+                        GoRoute(
+                          path: 'edit', // /diary/tabernacle/101/edit
+                          builder: (context, state) =>
+                              NewEntryScreen(entryId: _param(state, 'id')),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -115,6 +122,13 @@ final router = GoRouter(
                   path: ':id', // /diary/5
                   builder: (context, state) =>
                       EntryScreen(id: _param(state, 'id')),
+                  routes: [
+                    GoRoute(
+                      path: 'edit', // /diary/5/edit — та же форма, режим update
+                      builder: (context, state) =>
+                          NewEntryScreen(entryId: _param(state, 'id')),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -67,6 +67,15 @@ class EntryScreen extends StatelessWidget {
         title: Text(entry.isPrivate ? 'Скиния' : 'Запись'),
         actions: [
           IconButton(
+            tooltip: 'Редактировать',
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () => context.push(
+              entry.isPrivate
+                  ? '/diary/tabernacle/${entry.id}/edit'
+                  : '/diary/${entry.id}/edit',
+            ),
+          ),
+          IconButton(
             tooltip: 'Удалить',
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _delete(context, entry.id, entry.title),

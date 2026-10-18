@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:bibly_app/data/mock_data.dart';
 import 'package:bibly_app/main.dart';
 import 'package:bibly_app/router.dart';
 import 'package:bibly_app/screens/new_entry_screen.dart';
@@ -215,12 +216,24 @@ void main() {
   });
 
   test('Verse reference is checked against real books and chapters', () {
-    expect(Validators.verseReference(''), isNull); // необязательное поле
-    expect(Validators.verseReference('Ин 3:16'), isNull);
-    expect(Validators.verseReference('1 Кор 13'), isNull);
-    expect(Validators.verseReference('Ин'), 'Формат: «Ин 3:16» или «1 Кор 13»');
-    expect(Validators.verseReference('Абв 1'), 'Нет такой книги: «Абв»');
-    expect(Validators.verseReference('Ин 22'), 'В книге «От Иоанна» глав: 21');
+    expect(
+      Validators.verseReference('', MockData.books),
+      isNull,
+    ); // необязательное поле
+    expect(Validators.verseReference('Ин 3:16', MockData.books), isNull);
+    expect(Validators.verseReference('1 Кор 13', MockData.books), isNull);
+    expect(
+      Validators.verseReference('Ин', MockData.books),
+      'Формат: «Ин 3:16» или «1 Кор 13»',
+    );
+    expect(
+      Validators.verseReference('Абв 1', MockData.books),
+      'Нет такой книги: «Абв»',
+    );
+    expect(
+      Validators.verseReference('Ин 22', MockData.books),
+      'В книге «От Иоанна» глав: 21',
+    );
   });
 
   test('Tabernacle PIN and phone rules', () {
@@ -261,12 +274,15 @@ void main() {
     await tester.tap(find.text('Дневник — видна группе').last);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Сохранить'));
-    await tester.pumpAndSettle();
+    await waitNetwork(tester); // create идёт через «сеть» mock-а
     expect(
       find.text('Запись «Утро с Псалмом» сохранена в Дневник'),
       findsOneWidget,
     );
     expect(find.text('Мои записи'), findsOneWidget); // форма закрылась
+    // Список позади уже вырос: новая запись — сверху, счётчик 7 → 8.
+    expect(find.text('Утро с Псалмом'), findsOneWidget);
+    expect(find.text('8'), findsOneWidget);
   });
 
   testWidgets('Logout asks for confirmation; back does not return to login', (
@@ -347,5 +363,25 @@ void main() {
       find.descendant(of: entriesTile, matching: find.text('12')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Profile form writes through the model; greeting updates', (
+    tester,
+  ) async {
+    await tester.pumpWidget(createApp());
+    await logIn(tester);
+    expect(find.text('Доброе утро, Никита!'), findsOneWidget);
+
+    router.go('/profile/edit');
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).first, 'Мария Лупу');
+    await tester.tap(find.text('Сохранить'));
+    await waitNetwork(tester);
+    expect(find.text('Профиль сохранён'), findsOneWidget);
+    expect(find.text('Мария Лупу'), findsOneWidget); // экран профиля
+
+    router.go('/day');
+    await tester.pumpAndSettle();
+    expect(find.text('Доброе утро, Мария!'), findsOneWidget);
   });
 }

@@ -1,4 +1,4 @@
-import '../data/mock_data.dart';
+import '../models/bible_book.dart';
 
 /// Правила валидации полей форм. Каждый validator возвращает
 /// текст ошибки или null — null означает «значение верное».
@@ -47,16 +47,17 @@ class Validators {
 
   /// Ссылка на стих — необязательна; если указана, то в формате
   /// «Ин 3:16» / «1 Кор 13», книга должна существовать,
-  /// а глава — не превышать число глав в книге.
-  static String? verseReference(String? value) {
+  /// а глава — не превышать число глав в книге. Список книг приходит
+  /// из модели (BibleModel), а не из mock-данных.
+  static String? verseReference(String? value, List<BibleBook> books) {
     final v = value?.trim() ?? '';
     if (v.isEmpty) return null; // поле необязательное
     final m = RegExp(r'^(\d?\s?[А-Яа-яЁё]+)\s+(\d+)(?::(\d+))?$').firstMatch(v);
     if (m == null) return 'Формат: «Ин 3:16» или «1 Кор 13»';
+    // Книги ещё не загружены — проверить можно только формат.
+    if (books.isEmpty) return null;
     final abbr = m.group(1)!.replaceAll(' ', '').toLowerCase();
-    final matches = MockData.books.where(
-      (b) => b.abbreviation.toLowerCase() == abbr,
-    );
+    final matches = books.where((b) => b.abbreviation.toLowerCase() == abbr);
     if (matches.isEmpty) return 'Нет такой книги: «${m.group(1)}»';
     final book = matches.first;
     final chapter = int.parse(m.group(2)!);
