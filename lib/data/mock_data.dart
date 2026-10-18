@@ -3,11 +3,31 @@ import '../models/chapter_verse.dart';
 import '../models/community.dart';
 import '../models/daily_task.dart';
 import '../models/diary_entry.dart';
+import '../models/user_profile.dart';
 import '../models/verse.dart';
 
-/// Статические данные для ЛР2. С ЛР5 их заменит бэкенд.
+/// Seed-данные временного хранилища. С ЛР4 их импортируют ТОЛЬКО
+/// mock-репозитории (lib/data/mock/); с ЛР5 их заменит бэкенд.
 class MockData {
   MockData._();
+
+  // ---------- Профиль ----------
+
+  static const UserProfile user = UserProfile(
+    name: 'Никита Орманжи',
+    email: 'nikita@example.com',
+    memberSince: 'с сентября 2026',
+    streakDays: 12,
+    chaptersRead: 86,
+    lastReadBookId: 43, // От Иоанна
+    lastReadChapter: 3,
+    translation: 'Синодальный',
+    textSize: 'Средний',
+    reminderTime: 'каждый день в 07:30',
+    reminderOn: true,
+    shareWithGroup: true,
+    language: 'Русский',
+  );
 
   // ---------- Мой день ----------
 
