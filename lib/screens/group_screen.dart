@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
+import '../models/community_model.dart';
 import '../utils/app_constants.dart';
 import '../widgets/confirm_dialog.dart';
+import '../widgets/error_view.dart';
 import '../widgets/initials_avatar.dart';
 import '../widgets/section_header.dart';
 
@@ -32,9 +34,25 @@ class GroupScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final group = MockData.groups.firstWhere((g) => g.id == groupId);
-    // Участников в mock-данных общий список — показываем первых N.
-    final members = MockData.groupMembers.take(group.members).toList();
+    final model = context.watch<CommunityModel>();
+    final group = model.byId(groupId);
+    if (group == null) {
+      // Грузится / упало / загружено, но такой группы нет (вышли из неё).
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: model.isLoading
+              ? const CircularProgressIndicator()
+              : model.error != null
+              ? ErrorView(
+                  message: model.error!,
+                  onRetry: () => context.read<CommunityModel>().load(),
+                )
+              : const Text('Группа не существует'),
+        ),
+      );
+    }
+    final members = group.memberNames;
 
     return Scaffold(
       appBar: AppBar(title: Text(group.name)),

@@ -9,7 +9,11 @@ class MockCommunityRepository implements CommunityRepository {
   MockCommunityRepository(this._net);
 
   final MockNetwork _net;
-  final List<ReadingGroup> _groups = List.of(MockData.groups);
+  // Участников в seed-е общий список — каждой группе отдаём первых N.
+  final List<ReadingGroup> _groups = [
+    for (final g in MockData.groups)
+      g.copyWith(memberNames: MockData.groupMembers.take(g.members).toList()),
+  ];
 
   @override
   Future<Result<List<ReadingGroup>>> fetchGroups() async {

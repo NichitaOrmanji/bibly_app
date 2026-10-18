@@ -9,12 +9,25 @@ class ReadingGroup {
   /// Доля пройденного плана, от 0 до 1.
   final double progress;
 
+  /// Имена участников, которые отдаёт хранилище вместе с группой.
+  final List<String> memberNames;
+
   const ReadingGroup(
     this.id,
     this.name,
     this.members,
     this.plan,
-    this.progress,
+    this.progress, {
+    this.memberNames = const [],
+  });
+
+  ReadingGroup copyWith({List<String>? memberNames}) => ReadingGroup(
+    id,
+    name,
+    members,
+    plan,
+    progress,
+    memberNames: memberNames ?? this.memberNames,
   );
 }
 

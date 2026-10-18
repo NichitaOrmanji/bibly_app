@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
 import '../models/community.dart';
+import '../models/community_model.dart';
 import '../utils/app_constants.dart';
+import '../widgets/error_view.dart';
 import '../widgets/initials_avatar.dart';
 import '../widgets/section_header.dart';
 
@@ -14,8 +16,9 @@ class TogetherScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const groups = MockData.groups;
-    const feed = MockData.feed;
+    final model = context.watch<CommunityModel>(); // watch в build
+    final groups = model.groups;
+    final feed = model.feed;
 
     return Scaffold(
       appBar: AppBar(
@@ -28,30 +31,42 @@ class TogetherScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: AppConstants.paddingLarge),
-        children: [
-          SectionHeader(title: 'Мои группы', trailing: '${groups.length}'),
-          SizedBox(
-            height: 168,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.paddingMedium,
-              ),
-              itemCount: groups.length,
-              separatorBuilder: (_, _) =>
-                  const SizedBox(width: AppConstants.paddingSmall),
-              itemBuilder: (context, i) => _GroupCard(
-                group: groups[i],
-                onTap: () => context.push('/together/${groups[i].id}'),
-              ),
+      body: model.isLoading
+          ? const Center(child: CircularProgressIndicator()) // 1) грузится
+          : model.error != null
+          ? ErrorView(
+              // 2) упало
+              message: model.error!,
+              onRetry: () => context.read<CommunityModel>().load(),
+            )
+          : ListView(
+              // 3) данные
+              padding: const EdgeInsets.only(bottom: AppConstants.paddingLarge),
+              children: [
+                SectionHeader(
+                  title: 'Мои группы',
+                  trailing: '${groups.length}',
+                ),
+                SizedBox(
+                  height: 168,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppConstants.paddingMedium,
+                    ),
+                    itemCount: groups.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(width: AppConstants.paddingSmall),
+                    itemBuilder: (context, i) => _GroupCard(
+                      group: groups[i],
+                      onTap: () => context.push('/together/${groups[i].id}'),
+                    ),
+                  ),
+                ),
+                const SectionHeader(title: 'Лента друзей'),
+                for (final item in feed) _ActivityCard(activity: item),
+              ],
             ),
-          ),
-          const SectionHeader(title: 'Лента друзей'),
-          for (final item in feed) _ActivityCard(activity: item),
-        ],
-      ),
     );
   }
 }
