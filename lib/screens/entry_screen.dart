@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
+import '../models/diary_model.dart';
 import '../utils/app_constants.dart';
 import '../widgets/confirm_dialog.dart';
+import '../widgets/error_view.dart';
 
 /// Удаление: подтверждение → SnackBar → назад к списку.
 /// Запись на самом деле не исчезает — состояние появится в ЛР4.
@@ -22,8 +24,8 @@ Future<void> _delete(BuildContext context, String title) async {
 }
 
 /// Запись дневника — адреса /diary/:id и /diary/tabernacle/:id.
-/// Экран получает id из адреса и сам ищет запись (сначала в Дневнике,
-/// затем в Скинии); объект через extra не передаётся.
+/// Экран получает id из адреса и ищет запись через [DiaryModel];
+/// объект через extra не передаётся.
 class EntryScreen extends StatelessWidget {
   final int id;
 
@@ -33,10 +35,26 @@ class EntryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final entry = [
-      ...MockData.diaryEntries,
-      ...MockData.tabernacleEntries,
-    ].firstWhere((e) => e.id == id);
+    // Поиск через модель (L4), а не в mock-данных (L3).
+    final model = context.watch<DiaryModel>();
+    final entry = model.byId(id);
+    if (entry == null) {
+      // У null два смысла: список ещё грузится / загружен, но id нет
+      // (старая ссылка или удалённая запись) — не вечный spinner.
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: model.isLoading
+              ? const CircularProgressIndicator()
+              : model.error != null
+              ? ErrorView(
+                  message: model.error!,
+                  onRetry: () => context.read<DiaryModel>().load(),
+                )
+              : const Text('Запись не существует'),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
