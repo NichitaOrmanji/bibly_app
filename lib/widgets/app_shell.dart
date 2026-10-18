@@ -1,39 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import 'bible_screen.dart';
-import 'diary_screen.dart';
-import 'my_day_screen.dart';
-import 'profile_screen.dart';
-import 'together_screen.dart';
+/// Обёртка с постоянными вкладками. Текущий индекс знает router
+/// ([StatefulNavigationShell]), поэтому виджет — StatelessWidget:
+/// StatefulWidget-«леса» из ЛР2 больше не нужны.
+class AppShell extends StatelessWidget {
+  final StatefulNavigationShell navigationShell;
 
-/// Оболочка с нижней навигацией. Единственное состояние — индекс
-/// выбранной вкладки (это допускается условиями ЛР2).
-class MainShell extends StatefulWidget {
-  const MainShell({super.key});
-
-  @override
-  State<MainShell> createState() => _MainShellState();
-}
-
-class _MainShellState extends State<MainShell> {
-  int _index = 0;
-
-  static const List<Widget> _pages = [
-    MyDayScreen(),
-    BibleScreen(),
-    DiaryScreen(),
-    TogetherScreen(),
-    ProfileScreen(),
-  ];
+  const AppShell({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // IndexedStack сохраняет прокрутку вкладок при переключении.
-      body: IndexedStack(index: _index, children: _pages),
+      body: navigationShell, // содержимое текущей вкладки
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: navigationShell.goBranch, // переключает вкладку
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.wb_sunny_outlined),

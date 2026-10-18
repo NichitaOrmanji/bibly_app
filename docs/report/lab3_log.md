@@ -67,3 +67,22 @@ StatefulShellRoute.indexedStack (AppShell + NavigationBar)
   переменного `/diary/:id`, иначе «unlock» попал бы в `int.parse` и приложение упало бы.
 - Новый тест: адреса `/bible/1`, `/bible/43/3`, `/diary/2`, `/diary/tabernacle/101`,
   `/together/2` открывают правильные объекты. 11 тестов пройдены.
+
+### Шаг 5. Постоянные вкладки: StatefulShellRoute
+- Новый `lib/widgets/app_shell.dart`: `AppShell` — **StatelessWidget** со `Scaffold` и
+  `NavigationBar`; `selectedIndex: navigationShell.currentIndex`,
+  `onDestinationSelected: navigationShell.goBranch`. `MainShell` (StatefulWidget-«леса»
+  ЛР2 с `setState` на индексе) удалён.
+- Карта перестроена: `/login` и `/search` — вне shell-а; `StatefulShellRoute.indexedStack`
+  с 5 ветками (`/day`, `/bible`, `/diary`, `/together`, `/profile`); детали стали
+  **дочерними маршрутами** своих вкладок с относительными путями (`':bookId'`, `'unlock'`,
+  `'tabernacle'`, `':id'`, `':groupId'`). Порядок «фиксированные перед `:id`» сохранён.
+- Помощник `_param(state, name)` в `router.dart` — `int.parse` параметра пути.
+- Проверка на эмуляторе по четырём пунктам:
+  (a) прокрутил «Библию» до «Иова», перешёл в «Дневник» и обратно — список там же
+  (`01_shell_bible_scroll_kept.png`);
+  (b) книга открывается внутри вкладки, панель видна, стрелка «назад» работает
+  (`02_shell_book_inside_tab.png`);
+  (c) у экрана входа панели нет;
+  (d) после «Войти» `context.go('/day')` приводит на первую вкладку (`03_shell_after_login_day.png`).
+- 11 тестов пройдены.
