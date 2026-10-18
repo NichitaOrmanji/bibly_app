@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
+import '../models/diary_model.dart';
+import '../models/profile_model.dart';
+import '../models/user_profile.dart';
 import '../utils/app_constants.dart';
 import '../widgets/confirm_dialog.dart';
+import '../widgets/error_view.dart';
 import '../widgets/initials_avatar.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_tile.dart';
 
-/// Пункт настроек. Данные нужны только этому экрану,
-/// поэтому они лежат здесь, а не в mock_data.dart.
+/// Пункт настроек: подпись — часть интерфейса, значение — из профиля.
 class _Setting {
   final IconData icon;
   final String title;
@@ -21,25 +24,32 @@ class _Setting {
   const _Setting(this.icon, this.title, {this.value, this.switchOn});
 }
 
-const List<_Setting> _settings = [
-  _Setting(Icons.translate, 'Перевод Библии', value: 'Синодальный'),
-  _Setting(Icons.text_fields, 'Размер текста', value: 'Средний'),
+List<_Setting> _settingsOf(UserProfile p) => [
+  _Setting(Icons.translate, 'Перевод Библии', value: p.translation),
+  _Setting(Icons.text_fields, 'Размер текста', value: p.textSize),
   _Setting(
     Icons.notifications_outlined,
     'Напоминание о чтении',
-    value: 'каждый день в 07:30',
-    switchOn: true,
+    value: p.reminderTime,
+    switchOn: p.reminderOn,
   ),
-  _Setting(
+  const _Setting(
     Icons.dark_mode_outlined,
     'Тёмная тема',
     value: 'как в системе',
-    switchOn: false,
   ),
-  _Setting(Icons.lock_outline, 'Пароль Скинии', value: 'установлен'),
-  _Setting(Icons.public, 'Делиться записями с группой', switchOn: true),
-  _Setting(Icons.language, 'Язык приложения', value: 'Русский'),
-  _Setting(Icons.info_outline, 'О приложении', value: 'версия 0.2.0'),
+  const _Setting(Icons.lock_outline, 'Пароль Скинии', value: 'изменить'),
+  _Setting(
+    Icons.public,
+    'Делиться записями с группой',
+    switchOn: p.shareWithGroup,
+  ),
+  _Setting(Icons.language, 'Язык приложения', value: p.language),
+  const _Setting(
+    Icons.info_outline,
+    'О приложении',
+    value: 'версия ${AppConstants.appVersion}',
+  ),
 ];
 
 /// Выход: сначала подтверждение, затем go на вход.
@@ -56,17 +66,27 @@ Future<void> _logout(BuildContext context) async {
   }
 }
 
-/// «Профиль» — данные пользователя, статистика и настройки.
-/// Переключатели статические: значения берутся из списка выше.
+/// «Профиль» — данные пользователя ([ProfileModel]), статистика
+/// (число записей — из [DiaryModel]) и настройки.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final entriesCount =
-        MockData.diaryEntries.length + MockData.tabernacleEntries.length;
+    final model = context.watch<ProfileModel>(); // watch в build
+
+    final Widget body;
+    if (model.isLoading) {
+      body = const Center(child: CircularProgressIndicator()); // 1) грузится
+    } else if (model.error != null || model.profile == null) {
+      body = ErrorView(
+        // 2) упало
+        message: model.error ?? 'Не удалось загрузить профиль',
+        onRetry: () => context.read<ProfileModel>().load(),
+      );
+    } else {
+      body = _ProfileContent(profile: model.profile!); // 3) данные
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -75,93 +95,123 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Редактировать',
             icon: const Icon(Icons.edit_outlined),
-            onPressed: () => context.push('/profile/edit'),
+            onPressed: model.profile == null
+                ? null
+                : () => context.push('/profile/edit'),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: AppConstants.paddingLarge),
-        children: [
-          const SizedBox(height: AppConstants.paddingSmall),
-          const Center(
-            child: InitialsAvatar(name: MockData.userFullName, radius: 44),
-          ),
-          const SizedBox(height: AppConstants.paddingMedium),
-          Text(
-            MockData.userFullName,
-            textAlign: TextAlign.center,
-            style: textTheme.headlineSmall,
-          ),
-          Text(
-            '${MockData.userEmail} · ${MockData.memberSince}',
-            textAlign: TextAlign.center,
-            style: textTheme.bodyMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppConstants.paddingLarge),
+      body: body,
+    );
+  }
+}
+
+class _ProfileContent extends StatelessWidget {
+  final UserProfile profile;
+
+  const _ProfileContent({required this.profile});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    // Число записей — разделяемое состояние Дневника: добавили или
+    // удалили запись на другом экране — плитка обновится сама.
+    final diary = context.watch<DiaryModel>();
+    final entriesCount = diary.isLoading || diary.error != null
+        ? '…'
+        : '${diary.entries.length}';
+
+    return ListView(
+      padding: const EdgeInsets.only(bottom: AppConstants.paddingLarge),
+      children: [
+        const SizedBox(height: AppConstants.paddingSmall),
+        Center(child: InitialsAvatar(name: profile.name, radius: 44)),
+        const SizedBox(height: AppConstants.paddingMedium),
+        Text(
+          profile.name,
+          textAlign: TextAlign.center,
+          style: textTheme.headlineSmall,
+        ),
+        Text(
+          '${profile.email} · ${profile.memberSince}',
+          textAlign: TextAlign.center,
+          style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+        if (profile.about.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingMedium,
+            padding: const EdgeInsets.fromLTRB(
+              AppConstants.paddingLarge,
+              AppConstants.paddingSmall,
+              AppConstants.paddingLarge,
+              0,
             ),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: StatTile(
-                    icon: Icons.local_fire_department_outlined,
-                    value: '${MockData.streakDays}',
-                    label: 'дней подряд',
-                  ),
-                ),
-                const SizedBox(width: AppConstants.paddingSmall),
-                const Expanded(
-                  child: StatTile(
-                    icon: Icons.menu_book_outlined,
-                    value: '${MockData.chaptersRead}',
-                    label: 'глав прочитано',
-                  ),
-                ),
-                const SizedBox(width: AppConstants.paddingSmall),
-                Expanded(
-                  child: StatTile(
-                    icon: Icons.history_edu_outlined,
-                    value: '$entriesCount',
-                    label: 'записей',
-                  ),
-                ),
-              ],
+            child: Text(
+              profile.about,
+              textAlign: TextAlign.center,
+              style: textTheme.bodyMedium,
             ),
           ),
-          const SectionHeader(title: 'Настройки'),
-          for (final s in _settings)
-            ListTile(
-              leading: Icon(s.icon, color: scheme.onSurfaceVariant),
-              title: Text(s.title),
-              subtitle: s.value == null ? null : Text(s.value!),
-              trailing: s.switchOn == null
-                  ? Icon(Icons.chevron_right, color: scheme.outline)
-                  // Пустой onChanged: переключатель выглядит активным,
-                  // но значение не меняется (состояние — в ЛР4).
-                  : Switch(value: s.switchOn!, onChanged: (_) {}),
-              onTap: () {},
-            ),
-          const SizedBox(height: AppConstants.paddingMedium),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingMedium,
-            ),
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: scheme.error,
-                minimumSize: const Size.fromHeight(48),
+        const SizedBox(height: AppConstants.paddingLarge),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.paddingMedium,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: StatTile(
+                  icon: Icons.local_fire_department_outlined,
+                  value: '${profile.streakDays}',
+                  label: 'дней подряд',
+                ),
               ),
-              onPressed: () => _logout(context),
-              icon: const Icon(Icons.logout),
-              label: const Text('Выйти'),
-            ),
+              const SizedBox(width: AppConstants.paddingSmall),
+              Expanded(
+                child: StatTile(
+                  icon: Icons.menu_book_outlined,
+                  value: '${profile.chaptersRead}',
+                  label: 'глав прочитано',
+                ),
+              ),
+              const SizedBox(width: AppConstants.paddingSmall),
+              Expanded(
+                child: StatTile(
+                  icon: Icons.history_edu_outlined,
+                  value: entriesCount,
+                  label: 'записей',
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SectionHeader(title: 'Настройки'),
+        for (final s in _settingsOf(profile))
+          ListTile(
+            leading: Icon(s.icon, color: scheme.onSurfaceVariant),
+            title: Text(s.title),
+            subtitle: s.value == null ? null : Text(s.value!),
+            trailing: s.switchOn == null
+                ? Icon(Icons.chevron_right, color: scheme.outline)
+                : Switch(value: s.switchOn!, onChanged: (_) {}),
+            onTap: () {},
+          ),
+        const SizedBox(height: AppConstants.paddingMedium),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.paddingMedium,
+          ),
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: scheme.error,
+              minimumSize: const Size.fromHeight(48),
+            ),
+            onPressed: () => _logout(context),
+            icon: const Icon(Icons.logout),
+            label: const Text('Выйти'),
+          ),
+        ),
+      ],
     );
   }
 }

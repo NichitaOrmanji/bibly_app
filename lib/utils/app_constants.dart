@@ -3,6 +3,7 @@ class AppConstants {
   AppConstants._();
 
   static const String appName = 'Bibly';
+  static const String appVersion = '0.4.0';
 
   // Отступы
   static const double paddingSmall = 8.0;
