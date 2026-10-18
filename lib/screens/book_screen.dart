@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
 import '../models/bible_book.dart';
+import '../models/bible_model.dart';
+import '../models/profile_model.dart';
 import '../utils/app_constants.dart';
 import '../widgets/book_tile.dart';
+import '../widgets/error_view.dart';
 
 /// Книга — адрес /bible/:bookId. Сетка номеров глав;
 /// нажатие открывает главу: push на /bible/:bookId/:chapter.
@@ -17,8 +20,25 @@ class BookScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    // Экран сам находит книгу по id из адреса.
-    final book = MockData.books.firstWhere((b) => b.id == bookId);
+    // Экран ищет книгу по id из адреса — через модель (L4),
+    // а не напрямую в mock-данных (L3).
+    final model = context.watch<BibleModel>();
+    final book = model.byId(bookId);
+    final profile = context.watch<ProfileModel>().profile;
+    if (book == null) {
+      // У null два смысла: список ещё грузится / загружен, но id нет.
+      return Scaffold(
+        appBar: AppBar(),
+        body: model.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : model.error != null
+            ? ErrorView(
+                message: model.error!,
+                onRetry: () => context.read<BibleModel>().load(),
+              )
+            : const Center(child: Text('Книга не существует')),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(book.name)),
@@ -35,7 +55,7 @@ class BookScreen extends StatelessWidget {
             child: Text(
               '${book.testament == Testament.old ? 'Ветхий' : 'Новый'} Завет · '
               '${BookTile.chaptersLabel(book.chapters)} · '
-              'книга ${book.id} из ${MockData.books.length}',
+              'книга ${book.id} из ${model.books.length}',
               style: textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -58,8 +78,8 @@ class BookScreen extends StatelessWidget {
               itemBuilder: (context, i) {
                 final chapter = i + 1;
                 final isLastRead =
-                    book.id == MockData.lastReadBookId &&
-                    chapter == MockData.lastReadChapter;
+                    book.id == profile?.lastReadBookId &&
+                    chapter == profile?.lastReadChapter;
                 return Material(
                   color: isLastRead
                       ? scheme.primaryContainer

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
 import '../models/bible_book.dart';
+import '../models/bible_model.dart';
+import '../models/profile_model.dart';
 import '../utils/app_constants.dart';
 import '../widgets/book_tile.dart';
+import '../widgets/error_view.dart';
 import '../widgets/section_header.dart';
 
 /// «Библия» — продолжить чтение и список всех книг,
@@ -14,7 +17,8 @@ class BibleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const books = MockData.books;
+    final model = context.watch<BibleModel>(); // watch в build
+    final books = model.books;
     final oldCount = books.where((b) => b.testament == Testament.old).length;
     final newCount = books.length - oldCount;
 
@@ -29,38 +33,47 @@ class BibleScreen extends StatelessWidget {
           ),
         ],
       ),
-      // ListView.builder строит строки лениво — только видимые из 66 книг.
-      // Элемент 0 — карточка «Продолжить», дальше — книги.
-      body: ListView.builder(
-        padding: const EdgeInsets.only(bottom: AppConstants.paddingLarge),
-        itemCount: books.length + 1,
-        itemBuilder: (context, i) {
-          if (i == 0) return const _ContinueReadingCard();
+      body: model.isLoading
+          ? const Center(child: CircularProgressIndicator()) // 1) грузится
+          : model.error != null
+          ? ErrorView(
+              // 2) упало
+              message: model.error!,
+              onRetry: () =>
+                  context.read<BibleModel>().load(), // read: действие
+            )
+          // 3) данные. ListView.builder строит строки лениво — только
+          // видимые из 66 книг. Элемент 0 — «Продолжить», дальше — книги.
+          : ListView.builder(
+              padding: const EdgeInsets.only(bottom: AppConstants.paddingLarge),
+              itemCount: books.length + 1,
+              itemBuilder: (context, i) {
+                if (i == 0) return const _ContinueReadingCard();
 
-          final book = books[i - 1];
-          final tile = BookTile(
-            book: book,
-            onTap: () => context.push('/bible/${book.id}'),
-          );
+                final book = books[i - 1];
+                final tile = BookTile(
+                  book: book,
+                  onTap: () => context.push('/bible/${book.id}'),
+                );
 
-          // Заголовок завета ставим перед первой книгой каждого завета.
-          final startsTestament =
-              i == 1 || books[i - 2].testament != book.testament;
-          if (!startsTestament) return tile;
+                // Заголовок завета ставим перед первой книгой каждого завета.
+                final startsTestament =
+                    i == 1 || books[i - 2].testament != book.testament;
+                if (!startsTestament) return tile;
 
-          final isOld = book.testament == Testament.old;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SectionHeader(
-                title: isOld ? 'Ветхий Завет' : 'Новый Завет',
-                trailing: '${isOld ? oldCount : newCount} книг',
-              ),
-              tile,
-            ],
-          );
-        },
-      ),
+                final isOld = book.testament == Testament.old;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SectionHeader(
+                      title: isOld ? 'Ветхий Завет' : 'Новый Завет',
+                      trailing: '${isOld ? oldCount : newCount} книг',
+                    ),
+                    tile,
+                  ],
+                );
+              },
+            ),
     );
   }
 }
@@ -72,6 +85,13 @@ class _ContinueReadingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final profile = context.watch<ProfileModel>().profile;
+    final book = profile == null
+        ? null
+        : context.watch<BibleModel>().byId(profile.lastReadBookId);
+    // Профиль ещё грузится или упал — карточку просто не показываем:
+    // главные данные экрана — список книг, у него своя триада.
+    if (profile == null || book == null) return const SizedBox.shrink();
 
     return Card(
       elevation: 0,
@@ -89,20 +109,19 @@ class _ContinueReadingCard extends StatelessWidget {
         ),
         leading: Icon(Icons.bookmark, color: scheme.onPrimaryContainer),
         title: Text(
-          'Продолжить: ${MockData.lastReadBook}, '
-          'глава ${MockData.lastReadChapter}',
+          'Продолжить: ${book.name}, глава ${profile.lastReadChapter}',
           style: TextStyle(
             color: scheme.onPrimaryContainer,
             fontWeight: FontWeight.w600,
           ),
         ),
         subtitle: Text(
-          MockData.translation,
+          '${profile.translation} перевод',
           style: TextStyle(color: scheme.onPrimaryContainer),
         ),
         trailing: Icon(Icons.arrow_forward, color: scheme.onPrimaryContainer),
         onTap: () => context.push(
-          '/bible/${MockData.lastReadBookId}/${MockData.lastReadChapter}',
+          '/bible/${profile.lastReadBookId}/${profile.lastReadChapter}',
         ),
       ),
     );
