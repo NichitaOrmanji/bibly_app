@@ -4,7 +4,7 @@
 Результат: docs/report/PAM_L3_NichitaOrmanji.pdf (и .html рядом).
 
 Титульный лист, стили, вставка кода и git log — общие с ЛР2
-(build_report.py): группу и номер темы правьте там, в TITLE.
+(build_report.py): группу и тему правьте там, в TITLE.
 """
 
 import base64
