@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/mock_data.dart';
 import '../utils/app_constants.dart';
 import '../widgets/diary_entry_card.dart';
 import '../widgets/section_header.dart';
-import 'tabernacle_lock_screen.dart';
 
 /// «Дневник» — обычные записи и вход в «Скинию» (приватные записи).
 class DiaryScreen extends StatelessWidget {
@@ -64,12 +64,7 @@ class DiaryScreen extends StatelessWidget {
                   Icons.chevron_right,
                   color: scheme.onSecondaryContainer,
                 ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const TabernacleLockScreen(),
-                  ),
-                ),
+                onTap: () => context.push('/diary/unlock'),
               ),
             );
           }

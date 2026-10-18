@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/login_screen.dart';
+import 'router.dart';
 import 'utils/app_constants.dart';
 import 'utils/app_theme.dart';
 
@@ -11,14 +11,15 @@ class BiblyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       // Светлая или тёмная тема — по настройкам системы.
       themeMode: ThemeMode.system,
-      home: const LoginScreen(),
+      // Навигацию принимает router; home: больше нет — старт в initialLocation.
+      routerConfig: router,
     );
   }
 }

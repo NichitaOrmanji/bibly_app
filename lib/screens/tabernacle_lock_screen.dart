@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../utils/app_constants.dart';
-import 'tabernacle_screen.dart';
 
 /// Вход в «Скинию» — статический макет (ЛР2): поле пароля без проверки.
 /// Настоящая проверка пароля появится вместе с состоянием и бэкендом.
@@ -64,12 +64,8 @@ class TabernacleLockScreen extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                     ),
-                    onPressed: () => Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const TabernacleScreen(),
-                      ),
-                    ),
+                    // go: экран пароля уходит из стека, «назад» из Скинии ведёт в Дневник.
+                    onPressed: () => context.go('/diary/tabernacle'),
                     icon: const Icon(Icons.lock_open),
                     label: const Text('Открыть'),
                   ),

@@ -1,24 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/mock_data.dart';
 import '../utils/app_constants.dart';
 import '../widgets/verse_line.dart';
 
-/// «Чтение главы» — текст главы по стихам, выделенные стихи,
-/// переход к предыдущей и следующей главе (кнопки пока статические).
+/// «Чтение главы» — адрес /bible/:bookId/:chapter.
+/// Экран получает номера из адреса и сам находит книгу в данных.
 class ChapterScreen extends StatelessWidget {
-  const ChapterScreen({super.key});
+  final int bookId;
+  final int chapter;
+
+  const ChapterScreen({super.key, required this.bookId, required this.chapter});
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    // Поиск по id — сегодня в mock-данных, на L5 — с сервера.
+    final book = MockData.books.firstWhere((b) => b.id == bookId);
+    // Текст в mock-данных есть только у Ин 3; остальные главы — заглушка.
+    final hasText =
+        bookId == MockData.lastReadBookId &&
+        chapter == MockData.lastReadChapter;
+
     return Scaffold(
       appBar: AppBar(
         title: Column(
           children: [
-            Text('${MockData.lastReadBook} ${MockData.lastReadChapter}'),
+            Text('${book.name} $chapter'),
             Text(
               MockData.translation,
               style: textTheme.labelSmall?.copyWith(
@@ -40,36 +51,72 @@ class ChapterScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppConstants.paddingMedium,
-          AppConstants.paddingSmall,
-          AppConstants.paddingMedium,
-          AppConstants.paddingLarge,
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingSmall,
-              vertical: AppConstants.paddingSmall,
+      body: hasText
+          ? ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppConstants.paddingMedium,
+                AppConstants.paddingSmall,
+                AppConstants.paddingMedium,
+                AppConstants.paddingLarge,
+              ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(AppConstants.paddingSmall),
+                  child: Text(
+                    MockData.chapterHeading,
+                    style: textTheme.titleLarge?.copyWith(
+                      color: scheme.primary,
+                    ),
+                  ),
+                ),
+                for (final verse in MockData.chapterVerses)
+                  VerseLine(verse: verse),
+              ],
+            )
+          : Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppConstants.paddingLarge),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.cloud_download_outlined,
+                      size: 56,
+                      color: scheme.outline,
+                    ),
+                    const SizedBox(height: AppConstants.paddingMedium),
+                    Text(
+                      '${book.name}, глава $chapter',
+                      style: textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppConstants.paddingSmall),
+                    Text(
+                      'Текст этой главы будет загружаться с сервера '
+                      '(ЛР5). Пример текста — От Иоанна, глава 3.',
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            child: Text(
-              MockData.chapterHeading,
-              style: textTheme.titleLarge?.copyWith(color: scheme.primary),
-            ),
-          ),
-          for (final verse in MockData.chapterVerses) VerseLine(verse: verse),
-        ],
-      ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.paddingSmall),
           child: Row(
             children: [
               TextButton.icon(
-                onPressed: () {},
+                // pushReplacement: соседняя глава заменяет текущую,
+                // и «назад» по-прежнему ведёт к списку глав.
+                onPressed: chapter > 1
+                    ? () => context.pushReplacement(
+                        '/bible/$bookId/${chapter - 1}',
+                      )
+                    : null,
                 icon: const Icon(Icons.chevron_left),
-                label: const Text('Глава 2'),
+                label: Text('Гл. ${chapter > 1 ? chapter - 1 : chapter}'),
               ),
               const Spacer(),
               FilledButton.tonalIcon(
@@ -79,10 +126,16 @@ class ChapterScreen extends StatelessWidget {
               ),
               const Spacer(),
               TextButton.icon(
-                onPressed: () {},
+                onPressed: chapter < book.chapters
+                    ? () => context.pushReplacement(
+                        '/bible/$bookId/${chapter + 1}',
+                      )
+                    : null,
                 iconAlignment: IconAlignment.end,
                 icon: const Icon(Icons.chevron_right),
-                label: const Text('Глава 4'),
+                label: Text(
+                  'Гл. ${chapter < book.chapters ? chapter + 1 : chapter}',
+                ),
               ),
             ],
           ),

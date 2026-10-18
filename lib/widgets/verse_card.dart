@@ -19,7 +19,9 @@ class VerseCard extends StatelessWidget {
     return Card(
       elevation: 0,
       color: scheme.primaryContainer,
-      margin: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppConstants.paddingMedium,
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.paddingLarge),
         child: Column(

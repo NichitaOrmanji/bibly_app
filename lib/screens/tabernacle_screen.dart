@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/mock_data.dart';
 import '../utils/app_constants.dart';
@@ -20,7 +21,7 @@ class TabernacleScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Закрыть Скинию',
             icon: const Icon(Icons.lock),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.pop(),
           ),
         ],
       ),

@@ -75,7 +75,11 @@ class SearchScreen extends StatelessWidget {
               children: [
                 for (final q in MockData.recentSearches)
                   ActionChip(
-                    avatar: Icon(Icons.history, size: 18, color: scheme.outline),
+                    avatar: Icon(
+                      Icons.history,
+                      size: 18,
+                      color: scheme.outline,
+                    ),
                     label: Text(q),
                     onPressed: () {},
                   ),

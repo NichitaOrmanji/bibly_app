@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/mock_data.dart';
 import '../models/bible_book.dart';
 import '../utils/app_constants.dart';
 import '../widgets/book_tile.dart';
 import '../widgets/section_header.dart';
-import 'chapter_screen.dart';
-import 'search_screen.dart';
 
 /// «Библия» — продолжить чтение и список всех книг,
 /// разделённый на Ветхий и Новый Завет.
@@ -26,10 +25,7 @@ class BibleScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Поиск',
             icon: const Icon(Icons.search),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SearchScreen()),
-            ),
+            onPressed: () => context.push('/search'),
           ),
         ],
       ),
@@ -102,9 +98,8 @@ class _ContinueReadingCard extends StatelessWidget {
           style: TextStyle(color: scheme.onPrimaryContainer),
         ),
         trailing: Icon(Icons.arrow_forward, color: scheme.onPrimaryContainer),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ChapterScreen()),
+        onTap: () => context.push(
+          '/bible/${MockData.lastReadBookId}/${MockData.lastReadChapter}',
         ),
       ),
     );

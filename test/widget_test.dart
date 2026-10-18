@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bibly_app/main.dart';
+import 'package:bibly_app/router.dart';
 import 'package:bibly_app/widgets/book_tile.dart';
 import 'package:bibly_app/widgets/initials_avatar.dart';
 
 void main() {
+  // router — глобальный объект и помнит адрес между тестами:
+  // каждый тест начинаем с экрана входа.
+  setUp(() => router.go('/login'));
+
   testWidgets('Login screen is static and leads to My day', (tester) async {
     await tester.pumpWidget(const BiblyApp());
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/mock_data.dart';
 import '../utils/app_constants.dart';
 import '../widgets/initials_avatar.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_tile.dart';
-import 'login_screen.dart';
 
 /// Пункт настроек. Данные нужны только этому экрану,
 /// поэтому они лежат здесь, а не в mock_data.dart.
@@ -23,10 +23,18 @@ class _Setting {
 const List<_Setting> _settings = [
   _Setting(Icons.translate, 'Перевод Библии', value: 'Синодальный'),
   _Setting(Icons.text_fields, 'Размер текста', value: 'Средний'),
-  _Setting(Icons.notifications_outlined, 'Напоминание о чтении',
-      value: 'каждый день в 07:30', switchOn: true),
-  _Setting(Icons.dark_mode_outlined, 'Тёмная тема',
-      value: 'как в системе', switchOn: false),
+  _Setting(
+    Icons.notifications_outlined,
+    'Напоминание о чтении',
+    value: 'каждый день в 07:30',
+    switchOn: true,
+  ),
+  _Setting(
+    Icons.dark_mode_outlined,
+    'Тёмная тема',
+    value: 'как в системе',
+    switchOn: false,
+  ),
   _Setting(Icons.lock_outline, 'Пароль Скинии', value: 'установлен'),
   _Setting(Icons.public, 'Делиться записями с группой', switchOn: true),
   _Setting(Icons.language, 'Язык приложения', value: 'Русский'),
@@ -132,12 +140,8 @@ class ProfileScreen extends StatelessWidget {
                 foregroundColor: scheme.error,
                 minimumSize: const Size.fromHeight(48),
               ),
-              // Выход: просто возврат на экран входа, без логики.
-              onPressed: () => Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-                (_) => false,
-              ),
+              // go: раздел с вкладками целиком уходит из стека.
+              onPressed: () => context.go('/login'),
               icon: const Icon(Icons.logout),
               label: const Text('Выйти'),
             ),

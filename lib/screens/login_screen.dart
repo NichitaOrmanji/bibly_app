@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../utils/app_constants.dart';
-import 'main_shell.dart';
 
 /// Экран входа — строго статический макет (L2):
 /// без Form, без валидации, без логики аутентификации.
@@ -81,10 +81,7 @@ class LoginScreen extends StatelessWidget {
                       minimumSize: const Size.fromHeight(52),
                     ),
                     // Только переход дальше, чтобы не блокировать демонстрацию.
-                    onPressed: () => Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const MainShell()),
-                    ),
+                    onPressed: () => context.go('/day'),
                     child: const Text('Войти'),
                   ),
                   const SizedBox(height: AppConstants.paddingSmall),
