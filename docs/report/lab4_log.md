@@ -157,3 +157,14 @@
   интерфейсы → mock, стрелки watch/read, notifyListeners, `Future<Result<T>>`, переключатель аварии,
   блок «На ЛР5»).
 - `docs/report/build_report_l4.py` → `PAM_L4_NichitaOrmanji.pdf` по разделу 10 задания.
+
+### Сверка с методичкой (21.10)
+- Повторно пройдены все пункты задания и критерии оценивания по PDF ЛР4.
+- Найдены два места, где `read` фактически выполнялся во время build (правило C7: watch в build,
+  read в callback-ах):
+  - `_CrashSwitchState`: `late bool _on = context.read<MockNetwork>()...` — late-поле
+    инициализируется при первом обращении, то есть в build → перенесено в `initState`;
+  - `SearchScreen._matchingEntries` читал `context.read<BibleModel>().query`, а вызывается из build →
+    запрос передаётся параметром из модели, уже полученной через `watch`.
+- Проверки: `grep -rn "mock_data\|mockRecords" lib/screens lib/widgets lib/models` — пусто;
+  `flutter analyze` — без замечаний; 28 тестов пройдены. Отчёт пересобран со свежим `git log`.
