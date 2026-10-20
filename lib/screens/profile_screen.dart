@@ -230,7 +230,14 @@ class _CrashSwitch extends StatefulWidget {
 }
 
 class _CrashSwitchState extends State<_CrashSwitch> {
-  late bool _on = context.read<MockNetwork>().simulateError;
+  late bool _on;
+
+  @override
+  void initState() {
+    super.initState();
+    // Начальное положение — один раз при создании State, не в build.
+    _on = context.read<MockNetwork>().simulateError;
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -158,7 +158,7 @@ class _SearchScreenState extends State<SearchScreen> {
           onRetry: () => context.read<DiaryModel>().load(),
         );
       }
-      final entries = _matchingEntries(diary.entries);
+      final entries = _matchingEntries(diary.entries, model.query);
       return _ResultList(
         title: 'Найдено записей: ${entries.length}',
         count: entries.length,
@@ -200,8 +200,8 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   /// «Мой дневник»: записи, где встречается основа слова запроса.
-  List<DiaryEntry> _matchingEntries(List<DiaryEntry> entries) {
-    final q = context.read<BibleModel>().query.toLowerCase();
+  List<DiaryEntry> _matchingEntries(List<DiaryEntry> entries, String query) {
+    final q = query.toLowerCase();
     final stem = q.length > 3 ? q.substring(0, 3) : q;
     return entries
         .where(
