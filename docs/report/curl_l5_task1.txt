@@ -1,0 +1,78 @@
+$ curl -s -i localhost:8080/notes
+HTTP/1.1 401 Unauthorized
+x-powered-by: Dart with package:shelf
+access-control-allow-headers: Origin, Content-Type, Authorization
+date: Wed, 21 Oct 2026 07:03:04 GMT
+access-control-allow-origin: *
+access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+content-length: 70
+x-frame-options: SAMEORIGIN
+content-type: application/json
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+
+{"error":{"code":"UNAUTHORIZED","message":"Missing or invalid token"}}
+
+$ curl -s -X POST localhost:8080/auth/register -H 'Content-Type: application/json' -d '{"email":"ana@test.md","password":"parola123","name":"Ana"}'
+{"token":"eyJ...","user":{"id":1,"email":"ana@test.md","name":"Ana"}}
+
+$ curl -s -i -X POST localhost:8080/auth/register -H 'Content-Type: application/json' -d '{"email":"ana@test.md","password":"parola123","name":"Ana"}'
+HTTP/1.1 409 Conflict
+x-powered-by: Dart with package:shelf
+access-control-allow-headers: Origin, Content-Type, Authorization
+date: Wed, 21 Oct 2026 07:03:06 GMT
+access-control-allow-origin: *
+access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+content-length: 86
+x-frame-options: SAMEORIGIN
+content-type: application/json
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+
+{"error":{"code":"EMAIL_TAKEN","message":"An account with this email already exists"}}
+
+$ curl -s localhost:8080/notes -H "Authorization: Bearer $TOKEN"
+{"items":[],"page":1,"limit":20,"total":0}
+
+$ curl -s -i -X POST localhost:8080/notes -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json; charset=utf-8' --data-binary @../note.json
+HTTP/1.1 201 Created
+x-powered-by: Dart with package:shelf
+access-control-allow-headers: Origin, Content-Type, Authorization
+date: Wed, 21 Oct 2026 07:03:07 GMT
+access-control-allow-origin: *
+access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+content-length: 110
+x-frame-options: SAMEORIGIN
+content-type: application/json; charset=utf-8
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+
+{"id":1,"title":"Покупки","content":"молоко, хлеб","createdAt":"2026-10-21T07:03:07.029222Z"}
+
+$ curl -s -X POST localhost:8080/notes -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"title":"Second","content":"other"}'
+{"id":2,"title":"Second","content":"other","createdAt":"2026-10-21T07:03:07.127978Z"}
+
+$ curl -s -G localhost:8080/notes --data-urlencode 'search=Покуп' -H "Authorization: Bearer $TOKEN"
+Bad Request
+# curl на Windows кодирует кириллицу из командной строки в cp1251 (%CF%EE%EA%F3%EF),
+# сервер ждёт UTF-8 — поэтому 400. Тот же запрос, закодированный в UTF-8:
+
+$ curl -s "localhost:8080/notes?search=%D0%9F%D0%BE%D0%BA%D1%83%D0%BF" -H "Authorization: Bearer $TOKEN"
+{"items":[{"id":1,"title":"Покупки","content":"молоко, хлеб","createdAt":"2026-10-21T07:03:07.029222Z"}],"page":1,"limit":20,"total":1}
+
+# второй пользователь (Ion) запрашивает заметку Ana:
+$ curl -s -i localhost:8080/notes/1 -H "Authorization: Bearer $T2"
+HTTP/1.1 404 Not Found
+x-powered-by: Dart with package:shelf
+access-control-allow-headers: Origin, Content-Type, Authorization
+date: Wed, 21 Oct 2026 07:03:09 GMT
+access-control-allow-origin: *
+access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+content-length: 57
+x-frame-options: SAMEORIGIN
+content-type: application/json
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+
+{"error":{"code":"NOT_FOUND","message":"Note not found"}}
+

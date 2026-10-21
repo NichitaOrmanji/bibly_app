@@ -1,0 +1,10 @@
+# Dart tooling
+.dart_tool/
+
+# Runtime data (created automatically on first start)
+app.db
+app.db-*
+uploads/
+
+# Windows: sqlite3.dll copied locally (see README)
+sqlite3.dll

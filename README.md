@@ -43,3 +43,20 @@ flutter run
 ```
 
 Тесты: `flutter test`.
+
+## Backend (ЛР5)
+
+Сервер лежит в `server/`. Это backend-шаблон курса PAM, **порт на Dart** (Dart + Shelf + SQLite).
+Dart выбран потому, что он уже установлен вместе с Flutter и приложение и сервер
+написаны на одном языке.
+
+```bash
+cd server
+dart pub get
+dart run          # слушает http://localhost:8080, app.db создаётся сам
+```
+
+Переменные окружения: `PORT` (по умолчанию 8080), `JWT_SECRET`.
+На Windows пакету `sqlite3` нужен `sqlite3.dll` рядом с сервером. Подойдёт копия
+из `Python\DLLs\` или dll с sqlite.org. Файл в `.gitignore`.
+Из эмулятора Android сервер доступен по адресу `http://10.0.2.2:8080`.
