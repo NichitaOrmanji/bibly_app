@@ -18,6 +18,7 @@ import 'package:server/entries.dart';
 import 'package:server/errors.dart';
 import 'package:server/files.dart';
 import 'package:server/notes.dart';
+import 'package:server/profile.dart';
 import 'package:server/seed.dart';
 
 Future<void> main() async {
@@ -57,6 +58,9 @@ Future<void> main() async {
         ..get('/books/<id>/chapters/<n>', requireAuth(getChapter))
         ..get('/search', requireAuth(searchVerses))
         ..get('/me/searches', requireAuth(recentSearches))
+        // Bibly: profile details and settings (superset of /me).
+        ..get('/profile', requireAuth(getProfile))
+        ..put('/profile', requireAuth(updateProfile))
         ..post('/files', requireAuth(uploadFile))
         ..get('/files/<id>', downloadFile);
 

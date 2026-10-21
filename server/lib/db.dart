@@ -132,6 +132,24 @@ void initDb(String path) {
       created_at TEXT    NOT NULL
     );
 
+    -- Bibly: profile details and settings. name/email stay in users;
+    -- a missing row means "all defaults" (see profile.dart).
+    CREATE TABLE IF NOT EXISTS profiles (
+      user_id          INTEGER PRIMARY KEY REFERENCES users (id),
+      phone            TEXT    NOT NULL DEFAULT '',
+      about            TEXT    NOT NULL DEFAULT '',
+      streak_days      INTEGER NOT NULL DEFAULT 0,
+      chapters_read    INTEGER NOT NULL DEFAULT 0,
+      last_book_id     INTEGER NOT NULL DEFAULT 43,
+      last_chapter     INTEGER NOT NULL DEFAULT 3,
+      translation      TEXT    NOT NULL DEFAULT 'Синодальный',
+      text_size        TEXT    NOT NULL DEFAULT 'Средний',
+      reminder_time    TEXT    NOT NULL DEFAULT 'каждый день в 07:30',
+      reminder_on      INTEGER NOT NULL DEFAULT 1,
+      share_with_group INTEGER NOT NULL DEFAULT 1,
+      language         TEXT    NOT NULL DEFAULT 'Русский'
+    );
+
     CREATE TABLE IF NOT EXISTS files (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id    INTEGER NOT NULL REFERENCES users (id),
