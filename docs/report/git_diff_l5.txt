@@ -1,0 +1,38 @@
+$ git diff --stat 7e385c6 -- lib/screens lib/models
+ lib/models/bible_book.dart      | 13 ++++++
+ lib/models/chapter_text.dart    | 11 +++++
+ lib/models/chapter_verse.dart   |  6 +++
+ lib/models/community.dart       | 20 +++++++++
+ lib/models/daily_task.dart      | 15 +++++++
+ lib/models/day_plan.dart        | 10 +++++
+ lib/models/diary_entry.dart     | 20 +++++++++
+ lib/models/user_profile.dart    | 27 ++++++++++++
+ lib/models/verse.dart           |  3 ++
+ lib/screens/login_screen.dart   | 93 ++++++++++++++++++++++++++++++++---------
+ lib/screens/profile_screen.dart | 43 ++-----------------
+ 11 files changed, 203 insertions(+), 58 deletions(-)
+
+# ChangeNotifier-модели (lib/models/*_model.dart) — изменений нет:
+$ git diff --stat 7e385c6 -- "lib/models/*_model.dart"
+(пусто)
+
+$ git diff --stat 7e385c6 -- lib/main.dart lib/data
+ lib/data/api_message.dart                    |  27 ++
+ lib/data/auth_api.dart                       |  73 ++++
+ lib/data/http/api_client.dart                | 126 +++++++
+ lib/data/http/http_bible_repository.dart     |  49 +++
+ lib/data/http/http_community_repository.dart |  36 ++
+ lib/data/http/http_daily_repository.dart     |  27 ++
+ lib/data/http/http_diary_repository.dart     |  44 +++
+ lib/data/http/http_profile_repository.dart   |  23 ++
+ lib/data/mock/mock_bible_repository.dart     |  69 ----
+ lib/data/mock/mock_community_repository.dart |  38 ---
+ lib/data/mock/mock_daily_repository.dart     |  35 --
+ lib/data/mock/mock_diary_repository.dart     |  62 ----
+ lib/data/mock/mock_network.dart              |  18 -
+ lib/data/mock/mock_profile_repository.dart   |  26 --
+ lib/data/mock_data.dart                      | 478 ---------------------------
+ lib/data/profile_repository.dart             |   4 +-
+ lib/data/token_store.dart                    |  26 ++
+ lib/main.dart                                | 106 ++++--
+ 18 files changed, 506 insertions(+), 761 deletions(-)
