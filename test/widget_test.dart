@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'fakes/mock_data.dart';
-import 'fakes/mock_network.dart';
-import 'fakes/test_app.dart';
-
+import 'package:bibly_app/models/diary_entry.dart';
 import 'package:bibly_app/router.dart';
 import 'package:bibly_app/screens/new_entry_screen.dart';
 import 'package:bibly_app/utils/validators.dart';
 import 'package:bibly_app/widgets/book_tile.dart';
 import 'package:bibly_app/widgets/initials_avatar.dart';
 import 'package:bibly_app/widgets/stat_tile.dart';
+
+import 'fakes/mock_data.dart';
+import 'fakes/mock_diary_repository.dart';
+import 'fakes/mock_network.dart';
+import 'fakes/test_app.dart';
 
 /// Даёт mock-хранилищу «ответить»: задержка 800 мс идёт без анимации,
 /// поэтому одного pumpAndSettle мало.
@@ -427,5 +429,70 @@ void main() {
     await waitNetwork(tester); // профиль и счётчик записей грузятся по очереди
     expect(find.text('Симулировать сбой сети'), findsNothing);
     expect(find.text('Выйти'), findsOneWidget);
+  });
+
+  testWidgets('Diary search asks the repository and can be cleared', (
+    tester,
+  ) async {
+    await tester.pumpWidget(testApp());
+    await logIn(tester);
+    router.go('/diary');
+    await waitNetwork(tester);
+    expect(find.text('Мои записи'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'миротвор');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await waitNetwork(tester);
+    expect(find.text('Найдено по «миротвор»'), findsOneWidget);
+    expect(find.text('Блаженны миротворцы'), findsOneWidget);
+    expect(find.text('Родиться свыше'), findsNothing);
+
+    await tester.tap(find.byTooltip('Сбросить поиск'));
+    await waitNetwork(tester);
+    expect(find.text('Мои записи'), findsOneWidget);
+    expect(find.text('Родиться свыше'), findsOneWidget);
+  });
+
+  testWidgets('Diary list tail loads the next page', (tester) async {
+    final net = MockNetwork();
+    final diary = MockDiaryRepository(
+      net,
+      seed: [
+        for (var i = 1; i <= 25; i++)
+          DiaryEntry(
+            id: i,
+            title: 'Запись $i',
+            text: 'Текст записи номер $i',
+            dateLabel: '1 окт',
+          ),
+      ],
+    );
+    await tester.pumpWidget(testApp(net: net, diary: diary));
+    await logIn(tester);
+    router.go('/diary');
+    await waitNetwork(tester);
+    expect(find.text('Запись 1'), findsOneWidget);
+    // Скролл именно списка (у поля поиска свой внутренний Scrollable).
+    final list = find.descendant(
+      of: find.byType(RefreshIndicator),
+      matching: find.byType(Scrollable),
+    );
+
+    // Листаем до хвоста: он сам просит вторую страницу.
+    await tester.scrollUntilVisible(
+      find.text('Запись 20'),
+      300,
+      scrollable: list,
+    );
+    await tester.drag(list, const Offset(0, -600));
+    await tester.pump();
+    await waitNetwork(tester);
+    await tester.scrollUntilVisible(
+      find.text('Запись 25'),
+      300,
+      scrollable: list,
+    );
+    expect(find.text('Запись 25'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

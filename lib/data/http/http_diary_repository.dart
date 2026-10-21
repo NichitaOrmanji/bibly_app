@@ -14,13 +14,23 @@ class HttpDiaryRepository implements DiaryRepository {
   static DiaryEntry _entry(Object? j) =>
       DiaryEntry.fromJson(j as Map<String, dynamic>);
 
-  /// GET /entries → 200 {items, page, limit, total}: список — в items.
+  /// GET /entries?page=&limit=&search= → 200 {items, page, limit, total}:
+  /// сервер сам режет страницу и ищет — телефон получает только свой ломоть.
   @override
-  Future<Result<List<DiaryEntry>>> fetchAll() => _api.get(
+  Future<Result<List<DiaryEntry>>> fetchAll({
+    int page = 1,
+    int limit = 20,
+    String? search,
+  }) => _api.get(
     '/entries',
     (j) => [
       for (final e in (j as Map<String, dynamic>)['items'] as List) _entry(e),
     ],
+    query: {
+      'page': '$page',
+      'limit': '$limit',
+      if (search != null && search.isNotEmpty) 'search': search,
+    },
   );
 
   /// GET /entries/{id} → 200; 404 → Err через apiMessage.

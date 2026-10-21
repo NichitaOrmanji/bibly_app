@@ -21,7 +21,15 @@ class DiaryScreen extends StatelessWidget {
     final entries = model.publicEntries;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Дневник')),
+      appBar: AppBar(
+        title: const Text('Дневник'),
+        // Поиск над списком — в AppBar, чтобы поле не пропадало,
+        // пока список грузится. Ищет СЕРВЕР.
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(64),
+          child: _SearchField(),
+        ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/diary/new'),
         icon: const Icon(Icons.history_edu),
@@ -37,14 +45,18 @@ class DiaryScreen extends StatelessWidget {
             )
           // 3) данные. Свайп вниз — обновить список из хранилища.
           // ListView.builder: элемент 0 — вход в Скинию,
-          // 1 — заголовок, дальше — записи дневника.
+          // 1 — заголовок, дальше — записи дневника, а если на сервере
+          // есть ещё — хвост, который просит следующую страницу.
           : RefreshIndicator(
               onRefresh: () => context.read<DiaryModel>().load(),
               child: ListView.builder(
                 // Нижний отступ, чтобы FAB не закрывал последнюю запись.
                 padding: const EdgeInsets.only(bottom: 88),
-                itemCount: entries.length + 2,
+                itemCount: entries.length + 2 + (model.hasMore ? 1 : 0),
                 itemBuilder: (context, i) {
+                  if (i == entries.length + 2) {
+                    return _ListTail(error: model.moreError);
+                  }
                   if (i == 0) {
                     return Card(
                       elevation: 0,
@@ -86,7 +98,9 @@ class DiaryScreen extends StatelessWidget {
                   }
                   if (i == 1) {
                     return SectionHeader(
-                      title: 'Мои записи',
+                      title: model.search.isEmpty
+                          ? 'Мои записи'
+                          : 'Найдено по «${model.search}»',
                       trailing: '${entries.length}',
                     );
                   }
@@ -108,6 +122,107 @@ class DiaryScreen extends StatelessWidget {
                 },
               ),
             ),
+    );
+  }
+}
+
+/// Поле поиска. Свой State — ради контроллера текста; запрос уходит
+/// на сервер по Enter (а не на каждую букву).
+class _SearchField extends StatefulWidget {
+  const _SearchField();
+
+  @override
+  State<_SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<_SearchField> {
+  late final TextEditingController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    // Начальный текст — текущий фильтр модели (один раз, не в build).
+    _ctrl = TextEditingController(text: context.read<DiaryModel>().search);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _clear() {
+    _ctrl.clear();
+    setState(() {}); // спрятать крестик
+    context.read<DiaryModel>().load(search: '');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppConstants.paddingMedium,
+        0,
+        AppConstants.paddingMedium,
+        AppConstants.paddingSmall,
+      ),
+      child: TextField(
+        controller: _ctrl,
+        textInputAction: TextInputAction.search,
+        onChanged: (_) => setState(() {}), // показать/спрятать крестик
+        onSubmitted: (q) => context.read<DiaryModel>().load(search: q.trim()),
+        decoration: InputDecoration(
+          hintText: 'Поиск по записям',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _ctrl.text.isEmpty
+              ? null
+              : IconButton(
+                  tooltip: 'Сбросить поиск',
+                  icon: const Icon(Icons.close),
+                  onPressed: _clear,
+                ),
+          isDense: true,
+        ),
+      ),
+    );
+  }
+}
+
+/// Хвост списка: просит следующую страницу и показывает маленький spinner;
+/// если страница не пришла — сообщение и «Повторить».
+class _ListTail extends StatelessWidget {
+  const _ListTail({this.error});
+
+  final String? error;
+
+  @override
+  Widget build(BuildContext context) {
+    if (error != null) {
+      return Padding(
+        padding: const EdgeInsets.all(AppConstants.paddingMedium),
+        child: Column(
+          children: [
+            Text(error!, textAlign: TextAlign.center),
+            TextButton.icon(
+              onPressed: () => context.read<DiaryModel>().retryMore(),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Повторить'),
+            ),
+          ],
+        ),
+      );
+    }
+    // Хвост на экране — значит, пользователь долистал: просим ещё.
+    // read, а не watch: это действие; guard в модели не даст дублей.
+    context.read<DiaryModel>().loadMore();
+    return const Padding(
+      padding: EdgeInsets.all(AppConstants.paddingMedium),
+      child: Center(
+        child: SizedBox.square(
+          dimension: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
     );
   }
 }

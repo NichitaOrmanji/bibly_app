@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:bibly_app/data/auth_api.dart';
+import 'package:bibly_app/data/diary_repository.dart';
 import 'package:bibly_app/data/result.dart';
 import 'package:bibly_app/data/token_store.dart';
 import 'package:bibly_app/main.dart';
@@ -40,13 +41,13 @@ class FakeAuthApi extends AuthApi {
 
 /// Приложение на тестовых дублёрах: тот же корень композиции createApp,
 /// что и в main(), только хранилища — в памяти, а не http.
-/// [net] — чтобы тест мог включить аварию.
-Widget testApp({AuthApi? auth, MockNetwork? net}) {
+/// [net] — чтобы тест мог включить аварию; [diary] — свои записи.
+Widget testApp({AuthApi? auth, MockNetwork? net, DiaryRepository? diary}) {
   final n = net ?? MockNetwork();
   return createApp(
     auth: auth ?? FakeAuthApi(),
     daily: MockDailyRepository(n),
-    diary: MockDiaryRepository(n),
+    diary: diary ?? MockDiaryRepository(n),
     bible: MockBibleRepository(n),
     community: MockCommunityRepository(n),
     profile: MockProfileRepository(n),

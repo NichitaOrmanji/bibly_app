@@ -68,7 +68,7 @@ void main() {
     }, () => HttpDiaryRepository(api).fetchAll());
 
     expect(seen.method, 'GET');
-    expect(seen.url.toString(), 'http://server/entries');
+    expect(seen.url.path, '/entries');
     expect(seen.headers['Authorization'], 'Bearer eyJ.t.k');
     final list = (result as Ok<List<DiaryEntry>>).value;
     expect(list.single.title, 'Родиться свыше'); // не «Ð Ð¾Ð´…»
@@ -181,4 +181,27 @@ void main() {
     expect(seen.queryParameters['q'], 'любовь');
     expect(seen.query, contains('%D0%BB')); // «л» в UTF-8
   });
+
+  test(
+    'fetchAll: страница и поиск уходят в query, пустой поиск — нет',
+    () async {
+      final seen = <Uri>[];
+      Future<http.Response> handler(http.Request req) async {
+        seen.add(req.url);
+        return json({'items': [], 'page': 2, 'limit': 20, 'total': 0}, 200);
+      }
+
+      await withServer(
+        handler,
+        () => HttpDiaryRepository(api).fetchAll(page: 2, search: 'никодим'),
+      );
+      await withServer(handler, () => HttpDiaryRepository(api).fetchAll());
+      expect(seen[0].queryParameters, {
+        'page': '2',
+        'limit': '20',
+        'search': 'никодим',
+      });
+      expect(seen[1].queryParameters, {'page': '1', 'limit': '20'});
+    },
+  );
 }
