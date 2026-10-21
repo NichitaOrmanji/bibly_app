@@ -43,6 +43,30 @@ void initDb(String path) {
       created_at      TEXT    NOT NULL
     );
 
+    -- Bibly: "Мой день". One shared plan for today (seeded by seed.dart),
+    -- its tasks, and per-user "done" marks.
+    CREATE TABLE IF NOT EXISTS day_plan (
+      id          INTEGER PRIMARY KEY,
+      date_label  TEXT NOT NULL,
+      verse_text  TEXT NOT NULL,
+      verse_ref   TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS daily_tasks (
+      id        INTEGER PRIMARY KEY,
+      position  INTEGER NOT NULL,
+      title     TEXT    NOT NULL,
+      subtitle  TEXT    NOT NULL,
+      minutes   INTEGER NOT NULL,
+      type      TEXT    NOT NULL  -- quote | reading | reflection | prayer
+    );
+
+    CREATE TABLE IF NOT EXISTS task_done (
+      user_id INTEGER NOT NULL REFERENCES users (id),
+      task_id INTEGER NOT NULL REFERENCES daily_tasks (id),
+      PRIMARY KEY (user_id, task_id)
+    );
+
     CREATE TABLE IF NOT EXISTS files (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id    INTEGER NOT NULL REFERENCES users (id),

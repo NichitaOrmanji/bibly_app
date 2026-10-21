@@ -10,16 +10,19 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 
 import 'package:server/auth.dart';
+import 'package:server/daily.dart';
 import 'package:server/db.dart';
 import 'package:server/entries.dart';
 import 'package:server/errors.dart';
 import 'package:server/files.dart';
 import 'package:server/notes.dart';
+import 'package:server/seed.dart';
 
 Future<void> main() async {
   final port = int.tryParse(Platform.environment['PORT'] ?? '') ?? 8080;
 
   initDb('app.db'); // creates app.db + schema on first start
+  seedReferenceData(); // Bibly: shared reference data (plan, Bible, groups)
   initFileStorage('uploads'); // creates uploads/ on first start
 
   final router =
@@ -40,6 +43,9 @@ Future<void> main() async {
         ..get('/entries/<id>', requireAuth(getEntry))
         ..put('/entries/<id>', requireAuth(updateEntry))
         ..delete('/entries/<id>', requireAuth(deleteEntry))
+        // Bibly: "Мой день" — today's plan and per-user marks.
+        ..get('/plans/today', requireAuth(getToday))
+        ..patch('/plans/today/tasks/<id>', requireAuth(setTaskDone))
         ..post('/files', requireAuth(uploadFile))
         ..get('/files/<id>', downloadFile);
 
@@ -55,7 +61,7 @@ Future<void> main() async {
 // Permissive CORS so a Flutter *web* build can call the API during the labs.
 const _corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Origin, Content-Type, Authorization',
 };
 
