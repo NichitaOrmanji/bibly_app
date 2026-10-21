@@ -6,4 +6,10 @@ class ChapterVerse {
   final bool isHighlighted;
 
   const ChapterVerse(this.number, this.text, {this.isHighlighted = false});
+
+  factory ChapterVerse.fromJson(Map<String, dynamic> j) => ChapterVerse(
+    j['number'] as int,
+    j['text'] as String,
+    isHighlighted: j['isHighlighted'] as bool? ?? false,
+  );
 }

@@ -4,4 +4,7 @@ class Verse {
   final String reference;
 
   const Verse({required this.text, required this.reference});
+
+  factory Verse.fromJson(Map<String, dynamic> j) =>
+      Verse(text: j['text'] as String, reference: j['reference'] as String);
 }

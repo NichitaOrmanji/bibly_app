@@ -21,6 +21,18 @@ class ReadingGroup {
     this.memberNames = const [],
   });
 
+  /// Из JSON сервера (ЛР5). progress может прийти как 1 (int) — поэтому num.
+  factory ReadingGroup.fromJson(Map<String, dynamic> j) => ReadingGroup(
+    j['id'] as int,
+    j['name'] as String,
+    j['members'] as int,
+    j['plan'] as String,
+    (j['progress'] as num).toDouble(),
+    memberNames: [
+      for (final n in j['memberNames'] as List? ?? const []) n as String,
+    ],
+  );
+
   ReadingGroup copyWith({List<String>? memberNames}) => ReadingGroup(
     id,
     name,
@@ -47,4 +59,12 @@ class FriendActivity {
     this.sharedText,
     this.prayers = 0,
   });
+
+  factory FriendActivity.fromJson(Map<String, dynamic> j) => FriendActivity(
+    name: j['name'] as String,
+    action: j['action'] as String,
+    timeLabel: j['timeLabel'] as String,
+    sharedText: j['sharedText'] as String?,
+    prayers: j['prayers'] as int? ?? 0,
+  );
 }

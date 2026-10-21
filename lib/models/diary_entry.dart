@@ -22,6 +22,26 @@ class DiaryEntry {
     this.isPrivate = false,
   });
 
+  /// Из JSON сервера (ЛР5). Cast-ы `as` — граница доверия: если сервер
+  /// пришлёт не то, бросится TypeError, и хранилище превратит его в Err.
+  factory DiaryEntry.fromJson(Map<String, dynamic> j) => DiaryEntry(
+    id: j['id'] as int,
+    title: j['title'] as String,
+    text: j['text'] as String? ?? '',
+    dateLabel: j['dateLabel'] as String? ?? '',
+    verseReference: j['verseReference'] as String?,
+    isPrivate: j['isPrivate'] as bool? ?? false,
+  );
+
+  /// В JSON для сервера — без id: идентичность даёт сервер.
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'text': text,
+    'dateLabel': dateLabel,
+    'verseReference': verseReference,
+    'isPrivate': isPrivate,
+  };
+
   /// «Та же запись, другая идентичность» (create) или другие поля (update).
   DiaryEntry copyWith({
     int? id,

@@ -143,3 +143,54 @@ Commit защиты ЛР4 (для `git diff --stat` в Задании 5): `7e385
    Данные на экранах пока из mock-ов: на сервер их переведут Задания 4–5.
 9. Логи эмулятора показывают ошибки Impeller «Could not link pipeline program» —
    это особенность GPU эмулятора, экран рисуется нормально.
+
+## Задание 4. Http-хранилища: интерфейсы ЛР4 воплощены
+
+Железное правило соблюдено: **ни один интерфейс ЛР4 не изменён** (в
+`profile_repository.dart` поправлен только комментарий с адресом: `/me` → `/profile`).
+Рядом с mock-ами встали вторые реализации, `main.dart` пока не тронут (замена —
+Задание 5).
+
+1. **Сущности учат язык сервера.** У сущностей в `lib/models/` появились
+   `fromJson` (а у `DiaryEntry` и `UserProfile`, которые отправляются на сервер, ещё
+   и `toJson`): `DiaryEntry`, `DailyTask`, `DayPlan`, `Verse`, `BibleBook`,
+   `ChapterText`, `ChapterVerse`, `ReadingGroup`, `FriendActivity`, `UserProfile`.
+   - `toJson` — без `id`: идентичность даёт сервер.
+   - Cast-ы `as` — граница доверия: чужой формат → `TypeError` → `Err`.
+   - Перечисления приходят строками (`'reflection'`, `'old'`): неизвестное значение →
+     `FormatException`, а не падение.
+   - `progress` разбирается как `num` → `toDouble()`: JSON может прислать `1` как int.
+   ChangeNotifier-модели (`*_model.dart`) не тронуты.
+2. **`lib/data/http/api_client.dart` — общий скелет запроса.** В методичке каждый
+   метод повторяет один и тот же скелет. У нас 15 методов в 5 хранилищах, поэтому
+   скелет вынесен в `ApiClient._send` и написан один раз:
+   `Authorization: Bearer <token>` → `.timeout(8 с)` → **401**: `_sessionDied()`
+   (token стёрт из prefs + callback `onUnauthorized` — его задаёт корень, хранилище
+   router не знает) → **не тот статус**: `Err(apiMessage(res))` → разбор JSON →
+   `Ok(parse(json))`. Исключения ловятся по типам: `SocketException` /
+   `http.ClientException` (дорога), `TimeoutException`, `FormatException` /
+   `TypeError` (тело-сюрприз). Общего `catch (e)` нет.
+3. **Пять хранилищ** в `lib/data/http/`: `HttpDiaryRepository`,
+   `HttpDailyRepository`, `HttpBibleRepository`, `HttpCommunityRepository`,
+   `HttpProfileRepository`, каждое `implements` свой интерфейс ЛР4. Хорошие статусы:
+   GET/PUT/PATCH → 200, POST → 201, DELETE → 204 (`Ok(null)` без `jsonDecode`).
+   `fetchAll` дневника вскрывает пагинированный конверт `{items, page, limit, total}`.
+4. **Проблема: кириллица.** Сервер шаблона отвечает `content-type: application/json`
+   без `charset`. Пакет `http` в таком случае читает `res.body` как latin1, и
+   «Родиться» превратилось бы в «Ð Ð¾Ð´…». **Решение:** тело декодируется явно:
+   `jsonDecode(utf8.decode(res.bodyBytes))`. На это есть тест.
+5. **Тесты** `test/http_repository_test.dart` (10): «провод» подменён
+   `MockClient` через `http.runWithClient`, а код хранилищ работает настоящий.
+   Проверены Bearer-заголовок, разбор конверта, кириллица, POST без id → 201, DELETE 204
+   без разбора тела, 404 → «Запись не существует», 401 → token стёрт и корень
+   извещён, `SocketException` → «Нет сети», HTML → «Ответ не тот, что обещан»,
+   JSON не той формы → `TypeError` → тот же Err, PATCH отметки, кодирование
+   кириллицы в запросе поиска.
+6. **Проверка против настоящего сервера** `test/live_server_test.dart` (5):
+   регистрация нового пользователя, затем все пять хранилищ (полный CRUD дневника,
+   план и отметка, книги/глава/404/поиск/история, группы/лента/выход, профиль).
+   Обычный `flutter test` её пропускает; при работающем сервере:
+   `flutter test test/live_server_test.dart --dart-define=BIBLY_SERVER=http://localhost:8080`
+   → **5/5**. Вывод обоих наборов — `docs/report/http_tests_l5.txt`.
+7. Итог: `flutter analyze` — без замечаний; `flutter test` — 43 прошли,
+   5 живых пропущены (без сервера).

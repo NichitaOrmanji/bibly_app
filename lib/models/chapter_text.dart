@@ -15,5 +15,16 @@ class ChapterText {
     this.verses = const [],
   });
 
+  /// Из JSON сервера (ЛР5): GET /books/{id}/chapters/{n}.
+  factory ChapterText.fromJson(Map<String, dynamic> j) => ChapterText(
+    bookId: j['bookId'] as int,
+    chapter: j['chapter'] as int,
+    heading: j['heading'] as String?,
+    verses: [
+      for (final v in j['verses'] as List)
+        ChapterVerse.fromJson(v as Map<String, dynamic>),
+    ],
+  );
+
   bool get hasText => verses.isNotEmpty;
 }

@@ -39,6 +39,33 @@ class UserProfile {
     required this.language,
   });
 
+  /// Из JSON сервера (ЛР5): GET/PUT /profile.
+  factory UserProfile.fromJson(Map<String, dynamic> j) => UserProfile(
+    name: j['name'] as String,
+    email: j['email'] as String,
+    phone: j['phone'] as String? ?? '',
+    about: j['about'] as String? ?? '',
+    memberSince: j['memberSince'] as String? ?? '',
+    streakDays: j['streakDays'] as int,
+    chaptersRead: j['chaptersRead'] as int,
+    lastReadBookId: j['lastReadBookId'] as int,
+    lastReadChapter: j['lastReadChapter'] as int,
+    translation: j['translation'] as String,
+    textSize: j['textSize'] as String,
+    reminderTime: j['reminderTime'] as String,
+    reminderOn: j['reminderOn'] as bool,
+    shareWithGroup: j['shareWithGroup'] as bool,
+    language: j['language'] as String,
+  );
+
+  /// Для PUT /profile: сервер меняет только то, что правит форма профиля.
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'email': email,
+    'phone': phone,
+    'about': about,
+  };
+
   /// Имя для приветствия: «Никита Орманжи» → «Никита».
   String get firstName => name.trim().split(RegExp(r'\s+')).first;
 

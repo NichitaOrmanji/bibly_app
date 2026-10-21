@@ -18,4 +18,17 @@ class BibleBook {
     this.chapters,
     this.testament,
   );
+
+  /// Из JSON сервера (ЛР5). Завет приходит строкой: 'old' или 'new'.
+  factory BibleBook.fromJson(Map<String, dynamic> j) => BibleBook(
+    j['id'] as int,
+    j['name'] as String,
+    j['abbreviation'] as String,
+    j['chapters'] as int,
+    switch (j['testament'] as String) {
+      'old' => Testament.old,
+      'new' => Testament.newTestament,
+      final t => throw FormatException('Неизвестный завет: $t'),
+    },
+  );
 }

@@ -1,0 +1,19 @@
+00:00 +0: loading C:/Users/Nikita/bibly_app/test/http_repository_test.dart
+00:00 +0: C:/Users/Nikita/bibly_app/test/http_repository_test.dart: fetchAll: Bearer в заголовке, список из конверта, кириллица
+00:00 +1: C:/Users/Nikita/bibly_app/test/http_repository_test.dart: create: POST с toJson без id, 201 → запись с id сервера
+00:00 +2: C:/Users/Nikita/bibly_app/test/http_repository_test.dart: delete: 204 с пустым телом → Ok без jsonDecode
+00:00 +3: C:/Users/Nikita/bibly_app/test/http_repository_test.dart: слой 2: 404 → переведённое сообщение из конверта
+00:00 +4: C:/Users/Nikita/bibly_app/test/http_repository_test.dart: 401: token стёрт, корень извещён, сообщение о сессии
+00:00 +5: C:/Users/Nikita/bibly_app/test/http_repository_test.dart: слой 1: сервер недоступен → сообщение о сети
+00:00 +6: C:/Users/Nikita/bibly_app/test/http_repository_test.dart: слой 3: HTML вместо JSON → «Ответ не тот, что обещан»
+00:00 +7: C:/Users/Nikita/bibly_app/test/http_repository_test.dart: слой 3: JSON другой формы → TypeError → тот же Err
+00:00 +8: C:/Users/Nikita/bibly_app/test/http_repository_test.dart: PATCH отметки и разбор вида пункта
+00:00 +9: C:/Users/Nikita/bibly_app/test/live_server_test.dart: живой сервер (setUpAll)
+00:00 +10: C:/Users/Nikita/bibly_app/test/live_server_test.dart: живой сервер (setUpAll)
+00:01 +10: C:/Users/Nikita/bibly_app/test/live_server_test.dart: живой сервер дневник: create → fetchAll → fetchById → update → delete
+00:01 +11: C:/Users/Nikita/bibly_app/test/live_server_test.dart: живой сервер мой день: план и отметка
+00:01 +12: C:/Users/Nikita/bibly_app/test/live_server_test.dart: живой сервер Библия: книги, глава, поиск, история
+00:01 +13: C:/Users/Nikita/bibly_app/test/live_server_test.dart: живой сервер вместе: группы, лента, выход из группы
+00:01 +14: C:/Users/Nikita/bibly_app/test/live_server_test.dart: живой сервер профиль: fetch и update
+00:01 +15: C:/Users/Nikita/bibly_app/test/live_server_test.dart: живой сервер (tearDownAll)
+00:01 +15: All tests passed!
