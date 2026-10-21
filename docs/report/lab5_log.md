@@ -85,3 +85,61 @@ Commit защиты ЛР4 (для `git diff --stat` в Задании 5): `7e385
    404 на чужое, 204, upload/download файлов) и все маршруты Bibly:
    **PASS — 48/48** (полный вывод — `docs/report/api_check_l5.txt`).
    Это замена набора conformance до тех пор, пока он не получен.
+
+## Задание 3. Настоящий вход: форма ЛР3 + token в shared_preferences
+
+1. `flutter pub add http shared_preferences`.
+   **Замечание:** Flutter попросил включить «Режим разработчика» Windows (symlink-и
+   для плагинов desktop-сборок). На сборку под Android это не повлияло:
+   APK собрался без него.
+2. Новые файлы в `lib/data/`:
+   - `token_store.dart` — `TokenStore`: `read()` / `save()` / `clear()` поверх
+     shared_preferences, ключ `auth_token`. Только этот файл знает, где лежит пропуск.
+     **Пароль не сохраняется нигде.**
+   - `api_message.dart` — `apiMessage(res)`: вскрывает конверт ошибки
+     `{"error":{"code","message"}}` и переводит `code` на русский
+     (`UNAUTHORIZED` → «Неверный email или пароль», `EMAIL_TAKEN` → «Аккаунт с этим
+     email уже существует», …). Тело вне контракта → «Ошибка сервера (код)».
+   - `auth_api.dart` — `AuthApi`: `register`, `login`, `logout`. Общий `_post` с
+     `.timeout(8 с)` и тремя слоями отказа: `SocketException` / `TimeoutException`
+     (дорога), `statusCode` → `apiMessage` (ответ сервера), `FormatException` /
+     `TypeError` (тело-сюрприз). Всё сходится в `Err(msg)`. При успехе token уходит
+     в `TokenStore.save`.
+3. `login_screen.dart`: переключатель `_isRegister` и поле «Имя» (только при
+   регистрации, валидатор `Validators.name` из ЛР3). Валидаторы ЛР3 не тронуты,
+   переписан только submit: `context.read<AuthApi>()` → `Ok` → `context.go('/day')`,
+   `Err` → SnackBar. Флаг `_busy` гасит кнопку на время запроса (защита от
+   двойного submit), проверка `mounted` после `await`.
+4. Запуск решает по token-у: в `router.dart` `final router = GoRouter(...)` стал
+   `late final GoRouter router;` плюс функция `buildRouter(initialLocation:)`.
+   `main()` стал `async`: `WidgetsFlutterBinding.ensureInitialized()` →
+   `TokenStore().read()` → `router = buildRouter(initialLocation: loggedIn ? '/day' : '/login')`.
+   `createApp(auth:)` кладёт в корень `Provider<AuthApi>`; адрес сервера —
+   константа `apiBase = 'http://10.0.2.2:8080'` (для эмулятора ноутбук — 10.0.2.2).
+5. Профиль: «Выйти» → подтверждение → `AuthApi.logout()` (token стёрт) →
+   `context.go('/login')`.
+6. **Проблема:** Android 9+ блокирует обычный `http://`, а в основном манифесте не
+   было разрешения INTERNET (оно было только в debug). **Решение:** в
+   `android/app/src/main/AndroidManifest.xml` добавлены
+   `<uses-permission android.permission.INTERNET>` и
+   `android:usesCleartextTraffic="true"` (сервер лабораторной — без TLS).
+7. Тесты: виджет-тестам нужен `auth`, поэтому подставлена `FakeAuthApi`, которая
+   впускает без сервера (тесты проверяют экраны, а не сеть). Router строится один
+   раз в `setUpAll`. Новый `test/auth_test.dart`: перевод конверта
+   (`apiMessage`), `TokenStore` (save → read → clear на mock-prefs), SnackBar с
+   ошибкой сервера, режим регистрации с полем имени. Всего **33 теста — все проходят**,
+   `flutter analyze` без замечаний.
+8. Проверка на эмуляторе (сервер на ноутбуке, `http://10.0.2.2:8080`):
+   - первый запуск без token-а → экран входа;
+   - регистрация `nikita@bibly.md` → сервер: `POST [201] /auth/register` → «Мой день»
+     (`01_register_form.png`, `02_after_register.png`);
+   - приложение убито (`am force-stop`) и открыто снова → сразу «Мой день», без входа
+     (`03_reopen_logged_in.png`). В prefs лежит `flutter.auth_token`
+     (`docs/report/prefs_token_l5.txt`);
+   - «Выйти» → prefs пустые (`<map />`) → экран входа (`04_after_logout.png`);
+   - неверный пароль → сервер: `POST [401] /auth/login` → SnackBar
+     «Неверный email или пароль» (`05_wrong_password.png`);
+   - верный пароль → `POST [200] /auth/login` → «Мой день».
+   Данные на экранах пока из mock-ов: на сервер их переведут Задания 4–5.
+9. Логи эмулятора показывают ошибки Impeller «Could not link pipeline program» —
+   это особенность GPU эмулятора, экран рисуется нормально.

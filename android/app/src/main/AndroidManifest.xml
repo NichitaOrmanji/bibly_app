@@ -1,7 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- ЛР5: приложение ходит на свой сервер. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- usesCleartextTraffic: сервер лабораторной работает по http (без TLS)
+         на ноутбуке; Android 9+ без этого флага такие запросы блокирует. -->
     <application
         android:label="bibly_app"
         android:name="${applicationName}"
+        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

@@ -22,10 +22,15 @@ import 'widgets/app_shell.dart';
 int _param(GoRouterState state, String name) =>
     int.parse(state.pathParameters[name]!);
 
-/// Карта маршрутов приложения. Router — глобальный объект, создаётся один раз;
-/// после изменения карты нужен restart (R), hot reload (r) её не перечитывает.
-final router = GoRouter(
-  initialLocation: '/login', // приложение стартует со входа
+/// Router приложения — глобальный объект, создаётся один раз.
+/// С ЛР5 его строит main(): стартовый адрес зависит от сохранённого token-а,
+/// а прочитать token можно только асинхронно — поэтому late, а не сразу.
+late final GoRouter router;
+
+/// Карта маршрутов; [initialLocation] — '/login' или сразу '/day'.
+/// После изменения карты нужен restart (R), hot reload (r) её не перечитывает.
+GoRouter buildRouter({required String initialLocation}) => GoRouter(
+  initialLocation: initialLocation,
   routes: [
     // ВНЕ shell-а: вход без вкладок.
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),

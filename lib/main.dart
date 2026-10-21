@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'data/auth_api.dart';
 import 'data/bible_repository.dart';
 import 'data/community_repository.dart';
 import 'data/daily_repository.dart';
@@ -12,6 +13,7 @@ import 'data/mock/mock_diary_repository.dart';
 import 'data/mock/mock_network.dart';
 import 'data/mock/mock_profile_repository.dart';
 import 'data/profile_repository.dart';
+import 'data/token_store.dart';
 import 'models/bible_model.dart';
 import 'models/community_model.dart';
 import 'models/day_plan_model.dart';
@@ -21,13 +23,26 @@ import 'router.dart';
 import 'utils/app_constants.dart';
 import 'utils/app_theme.dart';
 
-void main() => runApp(createApp());
+/// Адрес сервера. Эмулятор Android не знает «localhost» ноутбука:
+/// для него ноутбук — 10.0.2.2. На десктопе — localhost,
+/// на настоящем телефоне — IP ноутбука в локальной сети.
+const apiBase = 'http://10.0.2.2:8080';
+
+Future<void> main() async {
+  // shared_preferences — плагин: до runApp нужен готовый binding.
+  WidgetsFlutterBinding.ensureInitialized();
+  final tokens = TokenStore();
+  // Запуск решает по token-у: есть пропуск — сразу в приложение.
+  final loggedIn = await tokens.read() != null;
+  router = buildRouter(initialLocation: loggedIn ? '/day' : '/login');
+  runApp(createApp(auth: AuthApi(apiBase, tokens)));
+}
 
 /// Корень композиции: ЗДЕСЬ (и только здесь) выбирается источник данных.
 /// На L5 строки с Mock* заменяются http-реализациями — экраны и модели
 /// не трогаются. Отдельная функция — чтобы тесты получали свежее
-/// состояние на каждый тест.
-Widget createApp() {
+/// состояние на каждый тест (и подставляли свой [auth] без сервера).
+Widget createApp({required AuthApi auth}) {
   final network = MockNetwork(); // на L5 исчезает вместе с mock-ами
   // Тип переменных — интерфейс: дальше никто не знает, что это mock.
   final DailyRepository daily = MockDailyRepository(network);
@@ -38,6 +53,8 @@ Widget createApp() {
 
   return MultiProvider(
     providers: [
+      // Вход/регистрация/выход — экран входа и профиль читают его через read.
+      Provider<AuthApi>.value(value: auth),
       // Леса демонстрации аварии (переключатель в профиле) — исчезают на L5.
       // Не ChangeNotifier и освобождать нечего — поэтому .value.
       Provider<MockNetwork>.value(value: network),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../data/auth_api.dart';
 import '../data/mock/mock_network.dart';
 import '../models/diary_model.dart';
 import '../models/profile_model.dart';
@@ -62,7 +63,9 @@ Future<void> _logout(BuildContext context) async {
     confirmLabel: 'Да, выйти',
   );
   // После await пользуемся context только если экран ещё на месте.
-  if (ok && context.mounted) {
+  if (!ok || !context.mounted) return;
+  await context.read<AuthApi>().logout(); // token выброшен из prefs
+  if (context.mounted) {
     context.go('/login'); // go: раздел с вкладками целиком уходит из стека
   }
 }
