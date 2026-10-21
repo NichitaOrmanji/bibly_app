@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'api_message.dart';
@@ -19,6 +20,11 @@ class AuthApi {
   final TokenStore tokens;
 
   static const _timeout = Duration(seconds: 8);
+
+  /// Номер сеанса: растёт при каждом успешном входе/регистрации.
+  /// Корень по нему пересоздаёт модели — данные прошлого пользователя
+  /// не переживают выход, новые грузятся с новым token-ом.
+  final session = ValueNotifier<int>(0);
 
   Future<Result<void>> register(String email, String password, String name) =>
       _post('/auth/register', {
@@ -50,8 +56,11 @@ class AuthApi {
       }
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       await tokens.save(data['token'] as String); // пропуск — в prefs
+      session.value++; // новый сеанс — свежие модели
       return const Ok(null);
     } on SocketException {
+      return const Err('Нет сети — повторите попытку');
+    } on http.ClientException {
       return const Err('Нет сети — повторите попытку');
     } on TimeoutException {
       return const Err('Сервер не отвечает');

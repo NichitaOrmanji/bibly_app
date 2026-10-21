@@ -1,8 +1,11 @@
-import '../../models/daily_task.dart';
-import '../../models/day_plan.dart';
-import '../daily_repository.dart';
-import '../mock_data.dart';
-import '../result.dart';
+import 'package:bibly_app/models/daily_task.dart';
+import 'package:bibly_app/models/day_plan.dart';
+import 'package:bibly_app/data/daily_repository.dart';
+
+import 'mock_data.dart';
+
+import 'package:bibly_app/data/result.dart';
+
 import 'mock_network.dart';
 
 /// «Мой день» в памяти: стих дня и отметки плана.

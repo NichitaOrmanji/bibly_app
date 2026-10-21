@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../data/auth_api.dart';
-import '../data/mock/mock_network.dart';
 import '../models/diary_model.dart';
 import '../models/profile_model.dart';
 import '../models/user_profile.dart';
@@ -189,8 +188,6 @@ class _ProfileContent extends StatelessWidget {
             ],
           ),
         ),
-        const SectionHeader(title: 'Демонстрация'),
-        const _CrashSwitch(),
         const SectionHeader(title: 'Настройки'),
         for (final s in _settingsOf(profile))
           ListTile(
@@ -218,41 +215,6 @@ class _ProfileContent extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Переключатель аварии — ЕДИНСТВЕННОЕ место UI, которому позволено
-/// знать о mock-е: леса демонстрации, исчезают на L5 вместе с ним.
-/// Положение переключателя — эфемерное состояние: bool в State + setState.
-class _CrashSwitch extends StatefulWidget {
-  const _CrashSwitch();
-
-  @override
-  State<_CrashSwitch> createState() => _CrashSwitchState();
-}
-
-class _CrashSwitchState extends State<_CrashSwitch> {
-  late bool _on;
-
-  @override
-  void initState() {
-    super.initState();
-    // Начальное положение — один раз при создании State, не в build.
-    _on = context.read<MockNetwork>().simulateError;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SwitchListTile(
-      secondary: const Icon(Icons.wifi_off_outlined),
-      title: const Text('Симулировать сбой сети'),
-      subtitle: const Text('Все запросы к хранилищу будут падать'),
-      value: _on,
-      onChanged: (value) {
-        setState(() => _on = value);
-        context.read<MockNetwork>().simulateError = value; // read в callback-е
-      },
     );
   }
 }

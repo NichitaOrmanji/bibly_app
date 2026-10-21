@@ -1,37 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:bibly_app/data/auth_api.dart';
-import 'package:bibly_app/data/mock_data.dart';
-import 'package:bibly_app/data/result.dart';
-import 'package:bibly_app/data/token_store.dart';
-import 'package:bibly_app/main.dart';
+import 'fakes/mock_data.dart';
+import 'fakes/mock_network.dart';
+import 'fakes/test_app.dart';
+
 import 'package:bibly_app/router.dart';
 import 'package:bibly_app/screens/new_entry_screen.dart';
 import 'package:bibly_app/utils/validators.dart';
 import 'package:bibly_app/widgets/book_tile.dart';
 import 'package:bibly_app/widgets/initials_avatar.dart';
 import 'package:bibly_app/widgets/stat_tile.dart';
-
-/// Вход без сервера: виджет-тесты проверяют экраны, а не сеть.
-/// Любые данные, прошедшие валидацию, впускают; token никуда не пишется.
-class FakeAuthApi extends AuthApi {
-  FakeAuthApi() : super('', TokenStore());
-
-  @override
-  Future<Result<void>> login(String email, String password) async =>
-      const Ok(null);
-
-  @override
-  Future<Result<void>> register(
-    String email,
-    String password,
-    String name,
-  ) async => const Ok(null);
-
-  @override
-  Future<void> logout() async {}
-}
 
 /// Даёт mock-хранилищу «ответить»: задержка 800 мс идёт без анимации,
 /// поэтому одного pumpAndSettle мало.
@@ -59,7 +38,7 @@ void main() {
   setUp(() => router.go('/login'));
 
   testWidgets('Login screen is static and leads to My day', (tester) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
 
     expect(find.byType(TextFormField), findsNWidgets(2));
     expect(find.text('Войти'), findsOneWidget);
@@ -74,7 +53,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     expect(tester.takeException(), isNull);
   });
 
@@ -83,7 +62,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
     expect(tester.takeException(), isNull);
 
@@ -95,7 +74,7 @@ void main() {
   });
 
   testWidgets('Bible tab lists books of both testaments', (tester) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
 
     await tester.tap(find.text('Библия'));
@@ -114,7 +93,7 @@ void main() {
   });
 
   testWidgets('Diary opens Tabernacle via password screen', (tester) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
 
     await tester.tap(find.text('Дневник'));
@@ -133,7 +112,7 @@ void main() {
   });
 
   testWidgets('Continue reading opens the chapter', (tester) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
 
     await tester.tap(find.text('Библия'));
@@ -148,7 +127,7 @@ void main() {
   testWidgets('Profile shows stats and settings, logout returns to login', (
     tester,
   ) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
 
     await tester.tap(find.text('Профиль').last);
@@ -172,7 +151,7 @@ void main() {
   });
 
   testWidgets('Search opens from My day and shows results', (tester) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
 
     await tester.tap(find.byTooltip('Поиск'));
@@ -194,7 +173,7 @@ void main() {
   testWidgets('Detail screens find their object by id from the address', (
     tester,
   ) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
 
     router.go('/bible/1');
     await tester.pumpAndSettle();
@@ -222,7 +201,7 @@ void main() {
   testWidgets('Login rejects invalid data and stays on the login screen', (
     tester,
   ) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
 
     await tester.tap(find.text('Войти'));
     await tester.pump();
@@ -278,7 +257,7 @@ void main() {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
     router.go('/diary');
     await tester.pumpAndSettle();
@@ -314,7 +293,7 @@ void main() {
   testWidgets('Logout asks for confirmation; back does not return to login', (
     tester,
   ) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
 
     // После входа стек — это /day: возвращаться на вход некуда.
@@ -347,7 +326,7 @@ void main() {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
 
     expect(find.text('2 из 4'), findsOneWidget);
@@ -362,7 +341,7 @@ void main() {
   testWidgets('Deleting an entry removes it from the list and the profile', (
     tester,
   ) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
 
     router.go('/profile');
@@ -394,7 +373,7 @@ void main() {
   testWidgets('Profile form writes through the model; greeting updates', (
     tester,
   ) async {
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    await tester.pumpWidget(testApp());
     await logIn(tester);
     expect(find.text('Доброе утро, Никита!'), findsOneWidget);
 
@@ -411,19 +390,16 @@ void main() {
     expect(find.text('Доброе утро, Мария!'), findsOneWidget);
   });
 
-  testWidgets('Crash switch: retry fails without crash, then data returns', (
+  testWidgets('Network failure: error view, retry brings data back', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(createApp(auth: FakeAuthApi()));
+    final net = MockNetwork(); // с ЛР5 переключателя в профиле нет —
+    await tester.pumpWidget(testApp(net: net)); // аварию включает тест
     await logIn(tester);
-
-    router.go('/profile');
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Симулировать сбой сети'));
-    await tester.pumpAndSettle();
+    net.simulateError = true;
 
     // Дневник ещё не загружался: первая загрузка падает → экран ошибки.
     router.go('/diary');
@@ -433,15 +409,23 @@ void main() {
     expect(find.text('Повторить'), findsOneWidget);
 
     // Авария выключена → «Повторить» → данные вернулись.
-    router.go('/profile');
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Симулировать сбой сети'));
-    await tester.pumpAndSettle();
-    router.go('/diary');
-    await tester.pumpAndSettle();
+    net.simulateError = false;
     await tester.tap(find.text('Повторить'));
     await waitNetwork(tester);
     expect(find.text('Мои записи'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Crash switch is gone from the profile', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(testApp());
+    await logIn(tester);
+    router.go('/profile');
+    await waitNetwork(tester);
+    await waitNetwork(tester); // профиль и счётчик записей грузятся по очереди
+    expect(find.text('Симулировать сбой сети'), findsNothing);
+    expect(find.text('Выйти'), findsOneWidget);
   });
 }

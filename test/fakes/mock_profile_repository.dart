@@ -1,7 +1,10 @@
-import '../../models/user_profile.dart';
-import '../mock_data.dart';
-import '../profile_repository.dart';
-import '../result.dart';
+import 'package:bibly_app/models/user_profile.dart';
+
+import 'mock_data.dart';
+
+import 'package:bibly_app/data/profile_repository.dart';
+import 'package:bibly_app/data/result.dart';
+
 import 'mock_network.dart';
 
 /// Профиль в памяти.

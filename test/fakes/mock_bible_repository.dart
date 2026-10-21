@@ -1,9 +1,12 @@
-import '../../models/bible_book.dart';
-import '../../models/chapter_text.dart';
-import '../../models/verse.dart';
-import '../bible_repository.dart';
-import '../mock_data.dart';
-import '../result.dart';
+import 'package:bibly_app/models/bible_book.dart';
+import 'package:bibly_app/models/chapter_text.dart';
+import 'package:bibly_app/models/verse.dart';
+import 'package:bibly_app/data/bible_repository.dart';
+
+import 'mock_data.dart';
+
+import 'package:bibly_app/data/result.dart';
+
 import 'mock_network.dart';
 
 /// Библия в памяти: 66 книг, текст одной главы (Ин 3) и поиск.

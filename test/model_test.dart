@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:bibly_app/data/mock/mock_diary_repository.dart';
-import 'package:bibly_app/data/mock/mock_network.dart';
+import 'fakes/mock_diary_repository.dart';
+import 'fakes/mock_network.dart';
+
 import 'package:bibly_app/models/diary_entry.dart';
 import 'package:bibly_app/models/diary_model.dart';
 

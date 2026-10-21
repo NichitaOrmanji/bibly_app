@@ -6,12 +6,12 @@ import 'data/bible_repository.dart';
 import 'data/community_repository.dart';
 import 'data/daily_repository.dart';
 import 'data/diary_repository.dart';
-import 'data/mock/mock_bible_repository.dart';
-import 'data/mock/mock_community_repository.dart';
-import 'data/mock/mock_daily_repository.dart';
-import 'data/mock/mock_diary_repository.dart';
-import 'data/mock/mock_network.dart';
-import 'data/mock/mock_profile_repository.dart';
+import 'data/http/api_client.dart';
+import 'data/http/http_bible_repository.dart';
+import 'data/http/http_community_repository.dart';
+import 'data/http/http_daily_repository.dart';
+import 'data/http/http_diary_repository.dart';
+import 'data/http/http_profile_repository.dart';
 import 'data/profile_repository.dart';
 import 'data/token_store.dart';
 import 'models/bible_model.dart';
@@ -35,38 +35,61 @@ Future<void> main() async {
   // Запуск решает по token-у: есть пропуск — сразу в приложение.
   final loggedIn = await tokens.read() != null;
   router = buildRouter(initialLocation: loggedIn ? '/day' : '/login');
-  runApp(createApp(auth: AuthApi(apiBase, tokens)));
+
+  // ЛР5: источник данных — сервер. Одна строка на хранилище — и всё.
+  // 401 (token умер) → ApiClient стёр token → корень уводит на вход;
+  // навигирует корень, хранилища router не знают.
+  final api = ApiClient(
+    apiBase,
+    tokens,
+    onUnauthorized: () => router.go('/login'),
+  );
+  runApp(
+    createApp(
+      auth: AuthApi(apiBase, tokens),
+      daily: HttpDailyRepository(api),
+      diary: HttpDiaryRepository(api),
+      bible: HttpBibleRepository(api),
+      community: HttpCommunityRepository(api),
+      profile: HttpProfileRepository(api),
+    ),
+  );
 }
 
-/// Корень композиции: ЗДЕСЬ (и только здесь) выбирается источник данных.
-/// На L5 строки с Mock* заменяются http-реализациями — экраны и модели
-/// не трогаются. Отдельная функция — чтобы тесты получали свежее
-/// состояние на каждый тест (и подставляли свой [auth] без сервера).
-Widget createApp({required AuthApi auth}) {
-  final network = MockNetwork(); // на L5 исчезает вместе с mock-ами
-  // Тип переменных — интерфейс: дальше никто не знает, что это mock.
-  final DailyRepository daily = MockDailyRepository(network);
-  final DiaryRepository diary = MockDiaryRepository(network);
-  final BibleRepository bible = MockBibleRepository(network);
-  final CommunityRepository community = MockCommunityRepository(network);
-  final ProfileRepository profile = MockProfileRepository(network);
-
-  return MultiProvider(
-    providers: [
-      // Вход/регистрация/выход — экран входа и профиль читают его через read.
-      Provider<AuthApi>.value(value: auth),
-      // Леса демонстрации аварии (переключатель в профиле) — исчезают на L5.
-      // Не ChangeNotifier и освобождать нечего — поэтому .value.
-      Provider<MockNetwork>.value(value: network),
-      // Модели — фабрикой: Provider создаёт лениво и сам вызывает dispose;
-      // ..load() запускает первую загрузку вместе с созданием.
-      ChangeNotifierProvider(create: (_) => DayPlanModel(daily)..load()),
-      ChangeNotifierProvider(create: (_) => DiaryModel(diary)..load()),
-      ChangeNotifierProvider(create: (_) => BibleModel(bible)..load()),
-      ChangeNotifierProvider(create: (_) => CommunityModel(community)..load()),
-      ChangeNotifierProvider(create: (_) => ProfileModel(profile)..load()),
-    ],
-    child: const BiblyApp(), // MaterialApp.router — нетронут с ЛР3
+/// Корень композиции: модели получают хранилища через конструктор.
+/// Типы параметров — ИНТЕРФЕЙСЫ: ни модели, ни экраны не знают, http там
+/// или тестовый дублёр. main() передаёт http-хранилища, тесты — свои.
+Widget createApp({
+  required AuthApi auth,
+  required DailyRepository daily,
+  required DiaryRepository diary,
+  required BibleRepository bible,
+  required CommunityRepository community,
+  required ProfileRepository profile,
+}) {
+  return Provider<AuthApi>.value(
+    // Вход/регистрация/выход — экран входа и профиль читают его через read.
+    value: auth,
+    // Новый вход — новый ключ — новые модели: данные прошлого пользователя
+    // не переживают выход, а первая загрузка идёт уже с новым token-ом.
+    child: ValueListenableBuilder<int>(
+      valueListenable: auth.session,
+      builder: (context, session, _) => MultiProvider(
+        key: ValueKey(session),
+        providers: [
+          // Модели — фабрикой: Provider создаёт лениво и сам вызывает dispose;
+          // ..load() запускает первую загрузку вместе с созданием.
+          ChangeNotifierProvider(create: (_) => DayPlanModel(daily)..load()),
+          ChangeNotifierProvider(create: (_) => DiaryModel(diary)..load()),
+          ChangeNotifierProvider(create: (_) => BibleModel(bible)..load()),
+          ChangeNotifierProvider(
+            create: (_) => CommunityModel(community)..load(),
+          ),
+          ChangeNotifierProvider(create: (_) => ProfileModel(profile)..load()),
+        ],
+        child: const BiblyApp(), // MaterialApp.router — нетронут с ЛР3
+      ),
+    ),
   );
 }
 

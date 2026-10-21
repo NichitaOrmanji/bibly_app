@@ -1,7 +1,10 @@
-import '../../models/community.dart';
-import '../community_repository.dart';
-import '../mock_data.dart';
-import '../result.dart';
+import 'package:bibly_app/models/community.dart';
+import 'package:bibly_app/data/community_repository.dart';
+
+import 'mock_data.dart';
+
+import 'package:bibly_app/data/result.dart';
+
 import 'mock_network.dart';
 
 /// Группы и лента в памяти.

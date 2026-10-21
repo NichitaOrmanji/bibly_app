@@ -1,7 +1,10 @@
-import '../../models/diary_entry.dart';
-import '../diary_repository.dart';
-import '../mock_data.dart';
-import '../result.dart';
+import 'package:bibly_app/models/diary_entry.dart';
+import 'package:bibly_app/data/diary_repository.dart';
+
+import 'mock_data.dart';
+
+import 'package:bibly_app/data/result.dart';
+
 import 'mock_network.dart';
 
 /// Записи дневника в памяти — с повадками сети (задержка + авария).

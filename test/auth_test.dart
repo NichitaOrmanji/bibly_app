@@ -7,8 +7,9 @@ import 'package:bibly_app/data/api_message.dart';
 import 'package:bibly_app/data/auth_api.dart';
 import 'package:bibly_app/data/result.dart';
 import 'package:bibly_app/data/token_store.dart';
-import 'package:bibly_app/main.dart';
 import 'package:bibly_app/router.dart';
+
+import 'fakes/test_app.dart';
 
 /// Сервер отвечает ошибкой: вход не удаётся с переведённым сообщением.
 class RejectingAuthApi extends AuthApi {
@@ -90,7 +91,7 @@ void main() {
     testWidgets('server error is shown in a SnackBar, user stays on login', (
       tester,
     ) async {
-      await tester.pumpWidget(createApp(auth: RejectingAuthApi()));
+      await tester.pumpWidget(testApp(auth: RejectingAuthApi()));
       await tester.enterText(find.byType(TextFormField).at(0), 'a@test.md');
       await tester.enterText(find.byType(TextFormField).at(1), 'gresit1');
       await tester.tap(find.text('Войти'));
@@ -104,7 +105,7 @@ void main() {
       tester,
     ) async {
       final auth = RejectingAuthApi();
-      await tester.pumpWidget(createApp(auth: auth));
+      await tester.pumpWidget(testApp(auth: auth));
       expect(find.byType(TextFormField), findsNWidgets(2));
 
       await tester.tap(find.text('Нет аккаунта? Зарегистрируйтесь'));

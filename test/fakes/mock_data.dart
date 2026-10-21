@@ -1,13 +1,14 @@
-import '../models/bible_book.dart';
-import '../models/chapter_verse.dart';
-import '../models/community.dart';
-import '../models/daily_task.dart';
-import '../models/diary_entry.dart';
-import '../models/user_profile.dart';
-import '../models/verse.dart';
+import 'package:bibly_app/models/bible_book.dart';
+import 'package:bibly_app/models/chapter_verse.dart';
+import 'package:bibly_app/models/community.dart';
+import 'package:bibly_app/models/daily_task.dart';
+import 'package:bibly_app/models/diary_entry.dart';
+import 'package:bibly_app/models/user_profile.dart';
+import 'package:bibly_app/models/verse.dart';
 
-/// Seed-данные временного хранилища. С ЛР4 их импортируют ТОЛЬКО
-/// mock-репозитории (lib/data/mock/); с ЛР5 их заменит бэкенд.
+/// Seed-данные тестовых дублёров. В ЛР4 это был источник данных приложения;
+/// с ЛР5 данные отдаёт сервер (server/lib/seed.dart), а этот файл живёт
+/// только в test/ — предсказуемые данные для виджет-тестов.
 class MockData {
   MockData._();
 
