@@ -67,6 +67,39 @@ void initDb(String path) {
       PRIMARY KEY (user_id, task_id)
     );
 
+    -- Bibly: "Вместе". Shared reading groups and the friends' feed (seeded).
+    -- Every user starts as a member of every group; leaving a group adds a
+    -- row to group_leaves, so the group disappears from that user's list.
+    CREATE TABLE IF NOT EXISTS reading_groups (
+      id       INTEGER PRIMARY KEY,
+      name     TEXT    NOT NULL,
+      members  INTEGER NOT NULL,
+      plan     TEXT    NOT NULL,
+      progress REAL    NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS group_members (
+      group_id INTEGER NOT NULL REFERENCES reading_groups (id),
+      position INTEGER NOT NULL,
+      name     TEXT    NOT NULL,
+      PRIMARY KEY (group_id, position)
+    );
+
+    CREATE TABLE IF NOT EXISTS group_leaves (
+      user_id  INTEGER NOT NULL REFERENCES users (id),
+      group_id INTEGER NOT NULL REFERENCES reading_groups (id),
+      PRIMARY KEY (user_id, group_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS feed (
+      id          INTEGER PRIMARY KEY,
+      name        TEXT    NOT NULL,
+      action      TEXT    NOT NULL,
+      time_label  TEXT    NOT NULL,
+      shared_text TEXT,
+      prayers     INTEGER NOT NULL DEFAULT 0
+    );
+
     CREATE TABLE IF NOT EXISTS files (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id    INTEGER NOT NULL REFERENCES users (id),

@@ -10,6 +10,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 
 import 'package:server/auth.dart';
+import 'package:server/community.dart';
 import 'package:server/daily.dart';
 import 'package:server/db.dart';
 import 'package:server/entries.dart';
@@ -46,6 +47,10 @@ Future<void> main() async {
         // Bibly: "Мой день" — today's plan and per-user marks.
         ..get('/plans/today', requireAuth(getToday))
         ..patch('/plans/today/tasks/<id>', requireAuth(setTaskDone))
+        // Bibly: "Вместе" — reading groups and the friends' feed.
+        ..get('/groups', requireAuth(listGroups))
+        ..delete('/groups/<id>/membership', requireAuth(leaveGroup))
+        ..get('/feed', requireAuth(listFeed))
         ..post('/files', requireAuth(uploadFile))
         ..get('/files/<id>', downloadFile);
 

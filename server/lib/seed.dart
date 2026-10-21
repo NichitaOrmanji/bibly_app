@@ -10,6 +10,64 @@ import 'db.dart';
 /// Fills the reference tables. Called once from bin/server.dart after initDb.
 void seedReferenceData() {
   _seedDayPlan();
+  _seedCommunity();
+}
+
+void _seedCommunity() {
+  const groups = [
+    (1, 'Малая группа «Филиппийцы»', 8, 'Послание к Филиппийцам', 0.75),
+    (2, 'Студенты УТМ', 23, 'Евангелие от Иоанна за 21 день', 0.43),
+    (3, 'Семья Орманжи', 4, 'Псалмы утешения', 0.6),
+    (4, 'Утренний кофе и Притчи', 12, 'Притчи — глава в день', 0.32),
+    (5, 'Молодёжь церкви «Благодать»', 31, 'Нагорная проповедь', 0.9),
+    (6, 'Библия за год 2026', 146, 'Вся Библия за 365 дней', 0.79),
+  ];
+  // Demo member names: each group lists the first N of them.
+  const people = [
+    'Никита Орманжи', 'Андрей Чобану', 'Елена Русу', 'Максим Бурлаку',
+    'Ольга Попеску', 'Даниил Морарь', 'Мария Лупу', 'Сергей Гуцу',
+    'Ирина Ткачук', 'Виктор Йордаке',
+  ];
+  for (final (id, name, members, plan, progress) in groups) {
+    db.execute(
+      'INSERT OR IGNORE INTO reading_groups (id, name, members, plan, progress) '
+      'VALUES (?, ?, ?, ?, ?)',
+      [id, name, members, plan, progress],
+    );
+    for (var i = 0; i < members && i < people.length; i++) {
+      db.execute(
+        'INSERT OR IGNORE INTO group_members (group_id, position, name) '
+        'VALUES (?, ?, ?)',
+        [id, i, people[i]],
+      );
+    }
+  }
+
+  const feed = [
+    (1, 'Андрей Чобану', 'закончил план «Нагорная проповедь»', '15 мин назад',
+        null, 6),
+    (2, 'Елена Русу', 'поделилась записью к Флп 4:6', '1 ч назад',
+        'Перестала тревожиться о сессии, когда начала записывать молитвы. '
+            'Список длинный, но на душе тише.', 11),
+    (3, 'Максим Бурлаку', 'читает Ин 3 — день 12 из 21', '2 ч назад', null, 2),
+    (4, 'Ольга Попеску', 'просит молитвы', '3 ч назад',
+        'Завтра у папы операция. Буду благодарна за молитвы обо всей нашей '
+            'семье.', 24),
+    (5, 'Даниил Морарь', '30 дней подряд с Библией', 'вчера', null, 9),
+    (6, 'Мария Лупу', 'поделилась записью к Пс 22:1', 'вчера',
+        'Господь — Пастырь мой. Перечитала в автобусе и впервые не спешила.',
+        7),
+    (7, 'Сергей Гуцу', 'присоединился к группе «Студенты УТМ»', '2 дня назад',
+        null, 3),
+  ];
+  for (final (id, name, action, time, shared, prayers) in feed) {
+    db.execute(
+      'INSERT OR IGNORE INTO feed '
+      '(id, name, action, time_label, shared_text, prayers) '
+      'VALUES (?, ?, ?, ?, ?, ?)',
+      [id, name, action, time, shared, prayers],
+    );
+  }
 }
 
 void _seedDayPlan() {
