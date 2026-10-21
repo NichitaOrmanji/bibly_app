@@ -100,6 +100,38 @@ void initDb(String path) {
       prayers     INTEGER NOT NULL DEFAULT 0
     );
 
+    -- Bibly: the Bible (read-only, seeded) and per-user search history.
+    CREATE TABLE IF NOT EXISTS books (
+      id           INTEGER PRIMARY KEY,  -- synodal order: 1 Genesis .. 66
+      name         TEXT    NOT NULL,
+      abbreviation TEXT    NOT NULL,
+      chapters     INTEGER NOT NULL,
+      testament    TEXT    NOT NULL      -- old | new
+    );
+
+    CREATE TABLE IF NOT EXISTS chapter_headings (
+      book_id INTEGER NOT NULL REFERENCES books (id),
+      chapter INTEGER NOT NULL,
+      heading TEXT    NOT NULL,
+      PRIMARY KEY (book_id, chapter)
+    );
+
+    CREATE TABLE IF NOT EXISTS verses (
+      book_id     INTEGER NOT NULL REFERENCES books (id),
+      chapter     INTEGER NOT NULL,
+      number      INTEGER NOT NULL,
+      text        TEXT    NOT NULL,
+      highlighted INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (book_id, chapter, number)
+    );
+
+    CREATE TABLE IF NOT EXISTS searches (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id    INTEGER NOT NULL REFERENCES users (id),
+      query      TEXT    NOT NULL,
+      created_at TEXT    NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS files (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id    INTEGER NOT NULL REFERENCES users (id),

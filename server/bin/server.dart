@@ -10,6 +10,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 
 import 'package:server/auth.dart';
+import 'package:server/bible.dart';
 import 'package:server/community.dart';
 import 'package:server/daily.dart';
 import 'package:server/db.dart';
@@ -51,6 +52,11 @@ Future<void> main() async {
         ..get('/groups', requireAuth(listGroups))
         ..delete('/groups/<id>/membership', requireAuth(leaveGroup))
         ..get('/feed', requireAuth(listFeed))
+        // Bibly: the Bible (read-only) and the user's search history.
+        ..get('/books', requireAuth(listBooks))
+        ..get('/books/<id>/chapters/<n>', requireAuth(getChapter))
+        ..get('/search', requireAuth(searchVerses))
+        ..get('/me/searches', requireAuth(recentSearches))
         ..post('/files', requireAuth(uploadFile))
         ..get('/files/<id>', downloadFile);
 
