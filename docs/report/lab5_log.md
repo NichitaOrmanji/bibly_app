@@ -307,3 +307,16 @@ Commit защиты ЛР4 (для `git diff --stat` в Задании 5): `7e385
 файлов пропускают задание без штрафа — балл покрывается пагинацией/поиском»).
 Маршрут `POST /files` шаблона не тронут и работает: его проверяет smoke-тест
 Задания 2 (upload → 201 → download тех же байтов).
+
+## Отчёт
+
+`python docs/report/build_report_l5.py` → `docs/report/PAM_L5_NichitaOrmanji.pdf`
+(19 страниц; титульные данные — общий словарь `TITLE` из `build_report.py`).
+Состав по методичке: диаграмма архитектуры с token-ом и путём 401
+(`architecture_l5.svg`) + фраза «что не пришлось менять и почему»; проверка
+контракта (smoke 48/48, с пометкой об отсутствии conformance) и список маршрутов
+темы; сессия curl на `/entries` (`curl_l5_entries.txt`: register → 401 без token-а →
+создание → 400 → список → `search=` → страница 2); ключевой код (`ApiClient._send`,
+`apiMessage`, `HttpDiaryRepository`, `fromJson`, путь 401); скриншоты (вход,
+ошибка входа, данные с сервера, сервер остановлен, retry, 401, пагинация, поиск);
+`git diff --stat` против ЛР4 и полный `git log --oneline`.

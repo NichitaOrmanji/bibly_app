@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 740" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3949AB"/>
+    </marker>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2E7D32"/>
+    </marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#B71C1C"/>
+    </marker>
+    <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#E65100"/>
+    </marker>
+  </defs>
+
+  <!-- Слой 1: экраны -->
+  <rect x="20" y="15" width="540" height="84" rx="12" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.5"/>
+  <text x="35" y="38" font-weight="700" font-size="15">Экраны (UI) — lib/screens/</text>
+  <text x="35" y="59">Мой день · Библия · Дневник · Скиния · Вместе · Профиль · формы</text>
+  <text x="35" y="80" fill="#555" font-size="12">НЕ узнали, что источник сменился (кроме входа и профиля — logout)</text>
+
+  <line x1="120" y1="99" x2="120" y2="150" stroke="#3949AB" stroke-width="2" marker-end="url(#a)"/>
+  <text x="128" y="128" fill="#3949AB">watch / read</text>
+  <line x1="420" y1="150" x2="420" y2="99" stroke="#2E7D32" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#g)"/>
+  <text x="428" y="128" fill="#2E7D32">notifyListeners()</text>
+
+  <!-- Слой 2: модели -->
+  <rect x="20" y="150" width="540" height="66" rx="12" fill="#E8F5E9" stroke="#2E7D32" stroke-width="1.5"/>
+  <text x="35" y="173" font-weight="700" font-size="15">Модели ChangeNotifier — lib/models/*_model.dart</text>
+  <text x="35" y="196" fill="#555" font-size="12">не тронуты на ЛР5 (Задание 6 добавило в DiaryModel поиск и страницы)</text>
+
+  <line x1="200" y1="216" x2="200" y2="260" stroke="#3949AB" stroke-width="2" marker-end="url(#a)"/>
+  <text x="210" y="243" fill="#3949AB" font-weight="700">Future&lt;Result&lt;T&gt;&gt;</text>
+  <text x="355" y="243" fill="#555" font-size="12">Ok(value) | Err(msg)</text>
+
+  <!-- Слой 3: интерфейсы -->
+  <rect x="20" y="260" width="540" height="62" rx="12" fill="#FFF8E1" stroke="#F9A825" stroke-width="1.5"/>
+  <text x="35" y="283" font-weight="700" font-size="15">Интерфейсы ЛР4 — lib/data/*_repository.dart</text>
+  <text x="35" y="305" fill="#555" font-size="12">не изменились; fetchAll дневника вырос совместимо: {page, limit, search}</text>
+
+  <line x1="200" y1="366" x2="200" y2="322" stroke="#F9A825" stroke-width="2" marker-end="url(#a)"/>
+  <text x="210" y="349" fill="#8D6E00">implements</text>
+
+  <!-- Слой 4: http -->
+  <rect x="20" y="366" width="540" height="112" rx="12" fill="#E1F5FE" stroke="#0277BD" stroke-width="1.5"/>
+  <text x="35" y="389" font-weight="700" font-size="15">ЛР5: Http*Repository ×5 — lib/data/http/</text>
+  <text x="35" y="410">Diary · Daily · Bible · Community · Profile + fromJson/toJson сущностей</text>
+  <text x="35" y="431">ApiClient._send: Bearer token · timeout 8 с · статус · разбор JSON</text>
+  <text x="35" y="452" fill="#555" font-size="12">3 слоя отказа: SocketException/Timeout · statusCode → apiMessage ·</text>
+  <text x="35" y="468" fill="#555" font-size="12">FormatException/TypeError — всё → Err(msg) на русском</text>
+
+  <!-- HTTP -->
+  <line x1="150" y1="478" x2="150" y2="548" stroke="#3949AB" stroke-width="2" marker-end="url(#a)"/>
+  <text x="158" y="505" fill="#3949AB">HTTP + JSON</text>
+  <text x="158" y="521" fill="#3949AB" font-size="12">Authorization: Bearer &lt;token&gt;</text>
+  <line x1="330" y1="548" x2="330" y2="478" stroke="#2E7D32" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#g)"/>
+  <text x="338" y="505" fill="#2E7D32" font-size="12">200 / 201 / 204</text>
+  <text x="338" y="521" fill="#2E7D32" font-size="12">4xx {"error":{"code"}}</text>
+
+  <!-- Слой 5: сервер -->
+  <rect x="20" y="548" width="540" height="92" rx="12" fill="#ECEFF1" stroke="#455A64" stroke-width="1.5"/>
+  <text x="35" y="571" font-weight="700" font-size="15">Сервер — server/ (Dart + Shelf + SQLite, :8080)</text>
+  <text x="35" y="592">шаблон: /auth · /me · /notes · /files — контракт не тронут</text>
+  <text x="35" y="612">Bibly: /entries · /plans/today · /groups · /feed · /books</text>
+  <text x="35" y="630">/search · /me/searches · /profile — данные пользователя по user_id</text>
+
+  <!-- test/fakes -->
+  <rect x="20" y="662" width="540" height="56" rx="10" fill="#FAFAFA" stroke="#9E9E9E" stroke-width="1.2" stroke-dasharray="6 4"/>
+  <text x="35" y="684" fill="#616161" font-weight="700">test/fakes/ — бывшие Mock*Repository + seed</text>
+  <text x="35" y="704" fill="#757575" font-size="12">только для виджет-тестов; в lib/ их нет (git mv на ЛР5)</text>
+
+  <!-- Правая колонка: корень -->
+  <rect x="590" y="15" width="230" height="122" rx="12" fill="#F3E5F5" stroke="#6A1B9A" stroke-width="1.5"/>
+  <text x="603" y="38" font-weight="700" font-size="14">main.dart — корень</text>
+  <text x="603" y="58" font-size="12">ЗДЕСЬ сменился источник:</text>
+  <text x="603" y="76" font-size="12">Mock* → Http*Repository(api)</text>
+  <text x="603" y="94" font-size="12">запуск: token есть → /day,</text>
+  <text x="603" y="110" font-size="12">иначе → /login</text>
+  <text x="603" y="128" font-size="12" fill="#B71C1C">onUnauthorized → go('/login')</text>
+
+  <!-- AuthApi -->
+  <rect x="590" y="166" width="230" height="64" rx="12" fill="#FFF3E0" stroke="#E65100" stroke-width="1.5"/>
+  <text x="603" y="189" font-weight="700" font-size="14">AuthApi — вход</text>
+  <text x="603" y="209" font-size="12">POST /auth/login | register</text>
+  <text x="603" y="224" font-size="12">→ token (пароль не хранится)</text>
+
+  <!-- TokenStore -->
+  <rect x="590" y="270" width="230" height="78" rx="12" fill="#FFF3E0" stroke="#E65100" stroke-width="1.5"/>
+  <text x="603" y="293" font-weight="700" font-size="14">TokenStore</text>
+  <text x="603" y="311" font-size="12">shared_preferences 'auth_token'</text>
+  <text x="603" y="327" font-size="12">login → save · запуск → read</text>
+  <text x="603" y="342" font-size="12">logout / 401 → clear</text>
+
+  <line x1="705" y1="230" x2="705" y2="268" stroke="#E65100" stroke-width="2" marker-end="url(#o)"/>
+  <text x="712" y="254" fill="#E65100" font-size="12">save(token)</text>
+  <line x1="590" y1="330" x2="562" y2="400" stroke="#E65100" stroke-width="2" marker-end="url(#o)"/>
+  <text x="566" y="372" fill="#E65100" font-size="12">read()</text>
+
+  <!-- Путь 401 -->
+  <path d="M560,600 L700,600 L700,470" fill="none" stroke="#B71C1C" stroke-width="2.2" stroke-dasharray="7 4" marker-end="url(#r)"/>
+  <text x="572" y="592" fill="#B71C1C" font-weight="700">401 — token умер</text>
+  <rect x="590" y="400" width="230" height="68" rx="10" fill="#FFEBEE" stroke="#B71C1C" stroke-width="1.5"/>
+  <text x="603" y="421" font-weight="700" font-size="13" fill="#B71C1C">ApiClient._sessionDied()</text>
+  <text x="603" y="440" font-size="12">1) tokens.clear()</text>
+  <text x="603" y="457" font-size="12">2) onUnauthorized() → корень</text>
+  <line x1="780" y1="400" x2="780" y2="350" stroke="#B71C1C" stroke-width="2" marker-end="url(#r)"/>
+  <text x="786" y="380" fill="#B71C1C" font-size="12">clear</text>
+  <path d="M815,400 L828,400 L828,80 L822,80" fill="none" stroke="#B71C1C" stroke-width="2" marker-end="url(#r)"/>
+</svg>
