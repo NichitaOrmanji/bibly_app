@@ -1,0 +1,53 @@
+# Базовый контракт шаблона
+✓ GET /health → 200 {status: ok}
+✓ POST /auth/register → 201 {token, user}
+✓ повторный register → 409 EMAIL_TAKEN
+✓ register без name → 400 VALIDATION_ERROR
+✓ POST /auth/login → 200 {token}
+✓ login с неверным паролем → 401 UNAUTHORIZED
+✓ GET /me → 200 {id, email, name}
+✓ GET /me с битым token → 401
+✓ GET /notes → 200 пустой конверт
+✓ POST /notes → 201, id от сервера
+✓ POST /notes без title → 400
+✓ GET /notes?search= → 1 элемент
+✓ PUT /notes/{id} → 200
+✓ чужая заметка → 404 (не 403)
+✓ DELETE /notes/{id} → 204, пустое тело
+✓ GET удалённой заметки → 404
+✓ POST /files (multipart) → 201 {url}
+✓ GET /files/{id} → байты обратно
+✓ неизвестный маршрут → 404 NOT_FOUND
+
+# Маршруты Bibly
+✓ GET /entries без token → 401
+✓ POST /entries → 201, id от сервера
+✓ POST /entries (Скиния, isPrivate) → 201
+✓ POST /entries без title → 400
+✓ GET /entries?search=НИКОДИМ → 1 (кириллица, без учёта регистра)
+✓ GET /entries?page=1&limit=1 → 1 из 2
+✓ GET /entries/{id} → 200
+✓ PUT /entries/{id} → 200
+✓ чужая запись → 404
+✓ DELETE /entries/{id} → 204
+✓ GET /plans/today → стих дня + 4 пункта
+✓ PATCH /plans/today/tasks/3 → isDone: true
+✓ отметка не видна другому пользователю
+✓ PATCH несуществующего пункта → 404
+✓ GET /groups → 6 групп с участниками
+✓ DELETE /groups/3/membership → 204
+✓ повторный выход → 404
+✓ после выхода групп 5
+✓ GET /feed → 7 событий
+✓ GET /books → 66 книг
+✓ GET /books/43/chapters/3 → Ин 3 с текстом
+✓ глава вне книги → 404
+✓ GET /search?q=любовь → 7 стихов
+✓ GET /search?q=Ин 3:16 → ровно 1
+✓ GET /me/searches → последние запросы
+✓ GET /profile → профиль с настройками
+✓ PUT /profile → 200
+✓ PUT /profile с чужим email → 409
+✓ /me после PUT /profile: та же форма {id, email, name}
+
+PASS — 48/48 checks passed
