@@ -11,6 +11,7 @@ import 'package:shelf_router/shelf_router.dart';
 
 import 'package:server/auth.dart';
 import 'package:server/db.dart';
+import 'package:server/entries.dart';
 import 'package:server/errors.dart';
 import 'package:server/files.dart';
 import 'package:server/notes.dart';
@@ -33,6 +34,12 @@ Future<void> main() async {
         ..get('/notes/<id>', requireAuth(getNote))
         ..put('/notes/<id>', requireAuth(updateNote))
         ..delete('/notes/<id>', requireAuth(deleteNote))
+        // Bibly: diary entries (public "Дневник" + private "Скиния").
+        ..get('/entries', requireAuth(listEntries))
+        ..post('/entries', requireAuth(createEntry))
+        ..get('/entries/<id>', requireAuth(getEntry))
+        ..put('/entries/<id>', requireAuth(updateEntry))
+        ..delete('/entries/<id>', requireAuth(deleteEntry))
         ..post('/files', requireAuth(uploadFile))
         ..get('/files/<id>', downloadFile);
 
